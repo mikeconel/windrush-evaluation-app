@@ -1,0 +1,189 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Windrush Foundation Evaluation</title>
+    <link rel="stylesheet" href="{% static 'css/form.css' %}">
+    <link rel="icon" href="/static/images/Windrush logo clipped1_redrawn BLUEE_v2 3_R1.png">
+</head>
+<body>
+    <div class="form-container">
+        <!--img src="static/Windrush logo clipped1_redrawn BLUEE_v2 3.jpg" width="160" height="96"-->
+        <!--img src="static/Windrush Foundation 30th Anniversary 2025_R4.jpg" width="160" height="96" align="right"-->
+        
+        <div class="header-logos">
+            {% load static %}
+            <img src="{% static 'images/Windrush logo clipped1_redrawn BLUEE_v2 3_R1.png' %}" 
+                 alt="Windrush Foundation Logo" 
+                 class="logo-left">
+            <img src="{% static 'images/Windrush Foundation 30th Anniversary 2025_R4.png' %}" 
+                 alt="30th Anniversary Logo" 
+                 class="logo-right">
+        </div>
+        <style>
+            .header-logos {
+                display: grid;
+                grid-template-columns: 1fr 1fr; /* Split into two equal columns */
+                align-items: center;
+                padding: 1rem 0;
+                gap: 2rem; /* Space between logos */
+            }
+            
+            .logo-left {
+                justify-self: end; /* Align to right of left column */
+                margin-right: 1rem; /* Additional spacing control */
+            }
+            
+            .logo-right {
+                justify-self: start; /* Align to left of right column */
+                margin-left: 1rem; /* Additional spacing control */
+            }
+            
+            .logo-left, .logo-right {
+                width: 170px;
+                height: 100px;
+                object-fit: contain;
+            }
+            
+            /* Mobile responsiveness */
+            @media (max-width: 768px) {
+                .header-logos {
+                    grid-template-columns: 1fr;
+                    justify-items: center;
+                    gap: 2rem;
+                }
+                
+                .logo-left, .logo-right {
+                    margin: 0; /* Reset margins on mobile */
+                    justify-self: center;
+                }
+            }
+            </style>
+
+        <h1>Event Evaluation Form</h1>
+        <br>
+        <p style="font-family: Arial, Helvetica, sans-serif;color: #1E3A8A; font-weight: 600 ;">
+            Windrush Foundation values the support we receive from the community, we want to hear your feedback of our in-person or online events.
+            We are committed to giving you, our supporters the highest quality products and service.
+            Your anonymous feedback will help us to ensure that both our in-person and online events are excelling in quality and variety.
+            Click on the button below to take part. It usually takes between 4 to 6 minutes to complete.
+            Thank you in advance.</p>
+
+        <form id="evalForm" method="POST">
+            {% csrf_token %}
+            
+            <div class="progress-bar">
+                <div class="progress" id="formProgress"></div>
+            </div>
+
+            <!-- Demographic Information Section -->
+            <div class="demographic-section question-section"> 
+                <h3>Demographic Information</h3>
+                <label>Gender:
+                    <select name="gender" required>
+                        <option value="" disabled selected>Select your gender</option>
+                        {% for value, label in gender_choices %}
+                        <option value="{{ value }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    <span class="required-indicator">*</span>
+                </label>
+                
+                <label>Ethnicity:
+                    <select name="ethnicity" required>
+                        {% for value, label in ethnicity_choices %}
+                        <option value="{{ value }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                
+                <label>Country:
+                    <input type="text" name="country" maxlength="100">
+                </label>
+                
+                <label>Postcode:
+                    <input type="text" name="postcode" maxlength="10">
+                </label>
+                
+                <label>Age:
+                    <select name="age" required>
+                        {% for value, label in age_choices %}
+                        <option value="{{ value }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                
+                <label>Accessibility needs:
+                    <select name="accessibility_needs" required>
+                        {% for value,label in accessibility_needs_choices %}
+                        <option value="{{ value }}">{{label}}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+
+                <!-- evaluations/templates/evaluations/form.html -->
+                <label>How did you hear about this event?
+                    <select name="referral_source">
+                        <option value="" disabled selected>Select referral source</option>
+                        {% for value, label in referral_choices %}
+                        <option value="{{ value }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+
+
+            </div>
+
+            <!-- Questions Section -->
+            {% for question in questions %}
+                <div class="question-section" role="region" aria-labelledby="section-{{ question.section }}">
+                    <div class="question" role="group" aria-required="true">
+                        <h3>{{ question.text }}</h3>
+                        {% if question.question_type == 'TX' %}
+                            <textarea name="q_{{ question.id }}"></textarea>
+                        {% elif question.question_type == 'RT' %}
+                            <div class="rating-scale">
+                                {% for i in "12345" %}
+                                <label>
+                                    <input type="radio" name="q_{{ question.id }}" value="{{ i }}">
+                                    {{ i }}
+                                </label>
+                                {% endfor %}
+                            </div>
+                        {% elif question.question_type == 'MC' %}
+                            <div class="options">
+                                {% for option in question.options %}
+                                <label>
+                                    <input type="checkbox" name="q_{{ question.id }}" value="{{ option }}">
+                                    {{ option }}
+                                </label>
+                                {% endfor %}
+                            </div>
+                        {% elif question.question_type == 'SC' %}
+                                <div class="single-choice">
+                                {% for option in question.options %}
+                                <label class="radio-option">
+                                    <input type="radio" name="q_{{ question.id }}" value="{{ option }}" required>
+                                    <span class="radio-label">{{ option }}</span>
+                                </label>
+                                {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+
+            <!-- Add Hidden Page Tracker Here -->
+            <input type="hidden" name="current_page" id="currentPage" value="0">
+
+            <!-- Navigation Buttons (keep existing) -->
+            <div class="form-navigation">
+                <button type="button" class="prev-btn">Previous</button>
+                <button type="button" class="next-btn">Next</button>
+                <button type="submit" class="submit-btn">Submit</button>
+            </div>
+        </form>
+    </div>
+
+    <script src="{% static 'js/form.js' %}"></script>
+</body>
