@@ -643,8 +643,11 @@ def main():
         page_icon="📊"
     )
 
-    # Add this to force session handling via Streamlit Cloud
-    st.session_state.disable_embedded_session = True  # 👈 Critical line
+    # Add these lines to override session handling
+    from streamlit.web.server.websocket_headers import _get_websocket_headers
+    headers = _get_websocket_headers()
+    if headers and "Host" in headers:
+        st.write(f"""<meta property="streamlit:host" content="{headers["Host"]}">""", unsafe_allow_html=True)
    
     # Custom CSS
     # css = """
