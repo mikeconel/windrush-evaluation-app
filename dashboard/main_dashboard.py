@@ -33,6 +33,18 @@ backend_dir = os.path.join(project_root, "backend")
 sys.path.extend([project_root, backend_dir])
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings")
 
+#################################
+# Force Streamlit to use your public URL
+os.environ['STREAMLIT_SERVER_ADDRESS'] = 'https://mikeconel-windrush-evaluation-ap-dashboardmain-dashboard-tiypok.streamlit.app'
+os.environ['STREAMLIT_SERVER_PORT'] = '443'  # HTTPS port
+
+# Disable localhost session fallback
+st.session_state.update({
+    '_host': 'https://mikeconel-windrush-evaluation-ap-dashboardmain-dashboard-tiypok.streamlit.app',
+    '_port': 443
+})
+#################################
+
 import django
 django.setup()
 
