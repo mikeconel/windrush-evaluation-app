@@ -31,20 +31,8 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(current_dir)
 backend_dir = os.path.join(project_root, "backend")
 
-#sys.path.extend([project_root, backend_dir])
-#os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings")
-
-############################
-# Force Streamlit to use your public URL
-os.environ['STREAMLIT_SERVER_ADDRESS'] = 'https://mikeconel-windrush-evaluation-ap-dashboardmain-dashboard-tiypok.streamlit.app'
-os.environ['STREAMLIT_SERVER_PORT'] = '443'  # HTTPS port
-
-# Disable localhost session fallback
-st.session_state.update({
-    '_host': 'https://mikeconel-windrush-evaluation-ap-dashboardmain-dashboard-tiypok.streamlit.app',
-    '_port': 443
-})
-#################################
+sys.path.extend([project_root, backend_dir])
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings")
 
 import django
 django.setup()
@@ -649,7 +637,34 @@ def sentiment_analysis(responses):
 
 import time
 from datetime import datetime
+
 def main():
+    # ===================================================
+    # 1. SESSION CONFIGURATION (ADD AT FUNCTION START)
+    # ===================================================
+    os.environ['STREAMLIT_SERVER_ADDRESS'] = 'https://mikeconel-windrush-evaluation-ap-dashboardmain-dashboard-tiypok.streamlit.app'
+    os.environ['STREAMLIT_SERVER_PORT'] = '443'
+    
+    st.session_state.update({
+        '_host': 'https://mikeconel-windrush-evaluation-ap-dashboardmain-dashboard-tiypok.streamlit.app',
+        '_port': 443
+    })
+
+    # ===================================================
+    # 2. META TAG INJECTION (ADD IMMEDIATELY AFTER)
+    # ===================================================
+    st.markdown("""
+        <meta property="streamlit:host" content="https://mikeconel-windrush-evaluation-ap-dashboardmain-dashboard-tiypok.streamlit.app">
+        <script>
+            window.addEventListener('load', function() {
+                if (window.location.hostname === 'localhost') {
+                    window.location.href = 'https://mikeconel-windrush-evaluation-ap-dashboardmain-dashboard-tiypok.streamlit.app';
+                }
+            });
+        </script>
+    """, unsafe_allow_html=True)
+
+
     st.set_page_config(
         page_title="Windrush Insights",
         layout="wide",
