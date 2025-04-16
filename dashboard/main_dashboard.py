@@ -31,8 +31,8 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(current_dir)
 backend_dir = os.path.join(project_root, "backend")
 
-sys.path.extend([project_root, backend_dir])
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings")
+#sys.path.extend([project_root, backend_dir])
+#os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings")
 
 ############################
 # Force Streamlit to use your public URL
