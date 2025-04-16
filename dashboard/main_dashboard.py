@@ -17,12 +17,10 @@ from datetime import datetime
 #nltk.download('punkt')
 
 # Load images
-#"Windrush logo clipped1_redrawn BLUEE_v2 3_R1.png"
-#logo = "dashboard\\images\\Windrush logo clipped1_redrawn BLUEE_v2 3_R1.png"
-logo = "dashboard/images/Windrush logo clipped1_redrawn BLUEE_v2 3_R1.png"
+
+logo = "dashboard\\images\\Windrush logo clipped1_redrawn BLUEE_v2 3_R1.png"
 logo_path = Image.open(logo) 
-#logo2 = "dashboard\\images\\Windrush Foundation 30th Anniversary 2025_R4.png"
-logo2 = "dashboard/images/Windrush Foundation 30th Anniversary 2025_R4.png"
+logo2 = "dashboard\\images\\Windrush Foundation 30th Anniversary 2025_R4.png"
 logo_path_2 = Image.open(logo2)
 
 # Configure Django environment
@@ -642,6 +640,9 @@ def main():
         layout="wide",
         page_icon="📊"
     )
+
+    # Add this to force session handling via Streamlit Cloud
+    st.session_state.disable_embedded_session = True  # 👈 Critical line
    
     # Custom CSS
     # css = """
