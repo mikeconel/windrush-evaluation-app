@@ -639,6 +639,13 @@ import time
 from datetime import datetime
 
 def main():
+
+    st.set_page_config(
+        page_title="Windrush Insights",
+        layout="wide",
+        page_icon="📊"
+    )
+
     # ===================================================
     # 1. SESSION CONFIGURATION (ADD AT FUNCTION START)
     # ===================================================
@@ -663,13 +670,6 @@ def main():
             });
         </script>
     """, unsafe_allow_html=True)
-
-
-    st.set_page_config(
-        page_title="Windrush Insights",
-        layout="wide",
-        page_icon="📊"
-    )
 
     # Add these lines to override session handling
     from streamlit.web.server.websocket_headers import _get_websocket_headers
