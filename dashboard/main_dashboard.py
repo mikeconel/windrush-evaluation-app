@@ -43,8 +43,9 @@ from evaluations.models import Participant, Response, Question, EvaluationSessio
 # CACHED DATA FUNCTIONS (MODIFIED)
 # ========================
 
-# Reduce TTL and add hashing for better cache invalidation
-@st.cache_data(ttl=60, show_spinner="Loading fresh public data...", hash_funcs={QuerySet: id})
+@st.cache_data(ttl=60, show_spinner="Loading fresh public data...", 
+               hash_funcs={"django.db.models.query.QuerySet": id})
+def get_public_data():
 def get_public_data():
     """Aggregate public-facing data with forced refresh"""
     return {
