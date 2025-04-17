@@ -40,28 +40,40 @@ django.setup()
 from evaluations.models import Participant, Response, Question, EvaluationSession
 
 # ========================
-# CACHED DATA FUNCTIONS
+# CACHED DATA FUNCTIONS (MODIFIED)
 # ========================
 
-@st.cache_data(ttl=3600)
+# Reduce TTL and add hashing for better cache invalidation
+@st.cache_data(ttl=60, show_spinner="Loading fresh public data...", hash_funcs={QuerySet: id})
 def get_public_data():
-    """Aggregate public-facing data"""
+    """Aggregate public-facing data with forced refresh"""
     return {
-        'participants': Participant.objects.values('gender', 'ethnicity', 'age'),
-        'responses': Response.objects.values('question__text', 'answer'),
-        'sessions': EvaluationSession.objects.filter(completed=True)
+        'participants': list(Participant.objects.values('gender', 'ethnicity', 'age')),
+        'responses': list(Response.objects.values('question__text', 'answer')),
+        'sessions': list(EvaluationSession.objects.filter(completed=True))
     }
 
-@st.cache_data(ttl=300)
+
+@st.cache_data(ttl=30, show_spinner="Loading secure data...")
 def get_private_data():
-    """Secure sensitive data access"""
+    """Secure sensitive data access with shorter TTL"""
     if st.session_state.get('authenticated'):
         return {
             'participants': pd.DataFrame(list(Participant.objects.all().values())),
             'responses': pd.DataFrame(list(Response.objects.all().values())),
-            'sessions': EvaluationSession.objects.all()
+            'sessions': list(EvaluationSession.objects.all())
         }
     return None
+
+
+# Add manual refresh control
+def clear_all_caches():
+    get_public_data.clear()
+    get_private_data.clear()
+    get_geospatial_data.clear()
+    st.cache_data.clear()
+
+
 
 @st.cache_data(ttl=86400, show_spinner=False)
 def get_geospatial_data():
@@ -771,7 +783,25 @@ def main():
 
     st.markdown(custom_css, unsafe_allow_html=True)
 
-    show_public_components(get_public_data())
+    # Add refresh button to sidebar
+    with st.sidebar:
+        if st.button("🔄 Force Refresh All Data"):
+            clear_all_caches()
+            st.rerun()
+
+    # Modify data loading with lock handling
+    try:
+        public_data = get_public_data()
+    except sqlite3.OperationalError as e:
+        if "database is locked" in str(e):
+            st.error("Database temporarily locked - refreshing...")
+            time.sleep(1)
+            clear_all_caches()
+            public_data = get_public_data()
+        else:
+            raise
+
+    show_public_components(public_data)
 
     # Authentication
     if 'authenticated' not in st.session_state:
