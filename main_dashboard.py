@@ -130,8 +130,59 @@ def show_private_insights(_private_data):
         
         # Total Participants
         with col1:
-            total = Participant.objects.count()
-            st.metric("Total Participants", total)
+            # Fetch participant data
+            result = Participant.objects.all().values('created_at')  # Get actual participant records with timestamps
+            df = pd.DataFrame(list(result))
+            if df.empty:
+                st.warning("No participant data available")
+                return
+
+            # Convert to datetime and sort
+            df['created_at'] = pd.to_datetime(df['created_at'])
+            df = df.sort_values('created_at')
+        
+            # Create daily count DataFrame
+            daily_counts = df.groupby(df['created_at'].dt.date).size().reset_index(name='count')
+            daily_counts.columns = ['date', 'participants']
+        
+            # Date range picker
+            min_date = daily_counts['date'].min()
+            max_date = daily_counts['date'].max()
+        
+            date_range = st.date_input(
+                "Select Date Range",
+                value=[min_date, max_date],
+                min_value=min_date,
+                max_value=max_date
+            )
+
+            # Filter data
+            if len(date_range) == 2:
+                mask = (
+                    (daily_counts['date'] >= date_range[0]) &
+                    (daily_counts['date'] <= date_range[1])
+                )
+                filtered_df = daily_counts.loc[mask]
+
+                if not filtered_df.empty:
+                    total_participants = filtered_df['participants'].sum()
+                    st.metric("Total Participants in Period", total_participants)
+                
+                    # Display timeline chart
+                    st.line_chart(filtered_df.set_index('date')['participants'])
+                else:
+                    st.warning("No records found in selected date range")
+            else:
+                st.error("Please select a valid date range")
+    
+    # Engagement Metrics
+    #with st.expander("Community Engagement Metrics", expanded=True):
+        #col1, col2, col3 = st.columns([1, 4, 2])
+        
+        # Total Participants
+        #with col1:
+            #total = Participant.objects.count()
+            #st.metric("Total Participants", total)
         
         # Recommendation Rate
         with col2:
