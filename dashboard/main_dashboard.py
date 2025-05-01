@@ -799,7 +799,7 @@ def main():
         with st.sidebar:
             # Sidebar UI components
             col1, col2, col3 = st.columns([1, 2, 6])
-            #col2.image(logo_path, width=140)
+            col2.image(logo_path, width=140)
             
             now = datetime.now()
             st.write(f"**Date:** {now.strftime('%d/%m/%Y')}  \n**Time:** {now.strftime('%H:%M:%S')}")
