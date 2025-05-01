@@ -18,12 +18,9 @@ from datetime import datetime
 
 # Load images
 
-#logo = "dashboard\\images\\Windrush logo clipped1_redrawn BLUEE_v2 3_R1.png"
-logo = "dashboard/images/Windrush Logo White_30th Anniversary_2025.png"
+logo = "dashboard\\images\\Windrush logo clipped1_redrawn BLUEE_v2 3_R1.png"
 logo_path = Image.open(logo) 
-
-#logo2 = "dashboard\\images\\Windrush Foundation 30th Anniversary 2025_R4.png"
-logo2 = "dashboard/images/Windrush Foundation 30th Anniversary 2025_R4.png"
+logo2 = "dashboard\\images\\Windrush Foundation 30th Anniversary 2025_R4.png"
 logo_path_2 = Image.open(logo2)
 
 # Configure Django environment
@@ -133,8 +130,59 @@ def show_private_insights(_private_data):
         
         # Total Participants
         with col1:
-            total = Participant.objects.count()
-            st.metric("Total Participants", total)
+            # Fetch participant data
+            result = Participant.objects.all().values('created_at')  # Get actual participant records with timestamps
+            df = pd.DataFrame(list(result))
+            if df.empty:
+                st.warning("No participant data available")
+                return
+
+            # Convert to datetime and sort
+            df['created_at'] = pd.to_datetime(df['created_at'])
+            df = df.sort_values('created_at')
+        
+            # Create daily count DataFrame
+            daily_counts = df.groupby(df['created_at'].dt.date).size().reset_index(name='count')
+            daily_counts.columns = ['date', 'participants']
+        
+            # Date range picker
+            min_date = daily_counts['date'].min()
+            max_date = daily_counts['date'].max()
+        
+            date_range = st.date_input(
+                "Select Date Range",
+                value=[min_date, max_date],
+                min_value=min_date,
+                max_value=max_date
+            )
+
+            # Filter data
+            if len(date_range) == 2:
+                mask = (
+                    (daily_counts['date'] >= date_range[0]) &
+                    (daily_counts['date'] <= date_range[1])
+                )
+                filtered_df = daily_counts.loc[mask]
+
+                if not filtered_df.empty:
+                    total_participants = filtered_df['participants'].sum()
+                    st.metric("Total Participants in Period", total_participants)
+                
+                    # Display timeline chart
+                    st.line_chart(filtered_df.set_index('date')['participants'])
+                else:
+                    st.warning("No records found in selected date range")
+            else:
+                st.error("Please select a valid date range")
+    
+    # Engagement Metrics
+    #with st.expander("Community Engagement Metrics", expanded=True):
+        #col1, col2, col3 = st.columns([1, 4, 2])
+        
+        # Total Participants
+        #with col1:
+            #total = Participant.objects.count()
+            #st.metric("Total Participants", total)
         
         # Recommendation Rate
         with col2:
@@ -637,45 +685,15 @@ def sentiment_analysis(responses):
 
 import time
 from datetime import datetime
-
 def main():
-
     st.set_page_config(
         page_title="Windrush Insights",
         layout="wide",
         page_icon="📊"
     )
 
-    # ===================================================
-    # 1. SESSION CONFIGURATION (ADD AT FUNCTION START)
-    # ===================================================
-    os.environ['STREAMLIT_SERVER_ADDRESS'] = 'https://mikeconel-windrush-evaluation-ap-dashboardmain-dashboard-tiypok.streamlit.app'
-    os.environ['STREAMLIT_SERVER_PORT'] = '443'
-    
-    st.session_state.update({
-        '_host': 'https://mikeconel-windrush-evaluation-ap-dashboardmain-dashboard-tiypok.streamlit.app',
-        '_port': 443
-    })
-
-    # ===================================================
-    # 2. META TAG INJECTION (ADD IMMEDIATELY AFTER)
-    # ===================================================
-    st.markdown("""
-        <meta property="streamlit:host" content="https://mikeconel-windrush-evaluation-ap-dashboardmain-dashboard-tiypok.streamlit.app">
-        <script>
-            window.addEventListener('load', function() {
-                if (window.location.hostname === 'localhost') {
-                    window.location.href = 'https://mikeconel-windrush-evaluation-ap-dashboardmain-dashboard-tiypok.streamlit.app';
-                }
-            });
-        </script>
-    """, unsafe_allow_html=True)
-
-    # Add these lines to override session handling
-    from streamlit.web.server.websocket_headers import _get_websocket_headers
-    headers = _get_websocket_headers()
-    if headers and "Host" in headers:
-        st.write(f"""<meta property="streamlit:host" content="{headers["Host"]}">""", unsafe_allow_html=True)
+    # Add this to force session handling via Streamlit Cloud
+    st.session_state.disable_embedded_session = True  # 👈 Critical line
    
     # Custom CSS
     # css = """
@@ -815,700 +833,3 @@ def main():
     st.write("Designed by BIS Smart Digital Technologies")
 if __name__ == "__main__":
     main()
-
-
-# import streamlit as st
-# import time
-# from datetime import datetime
-
-
-# def main():
-#     st.set_page_config(
-#         page_title="Windrush Insights",
-#         layout="wide",
-#         page_icon="📊"
-#     )
-
-#     #global private_data
-#     #global public_data 
-#         # Custom CSS
-#     # css = """
-#     # <style>
-#     # [data-testid="stSidebar"] { background-color: #1E3A8A; }
-#     # .stButton>button { background-color: #C4A747!important; color: #1E3A8A!important; }
-#     # [data-testid="stTextInput"] input { color: #1E3A8A!important; background: #F8FAFC!important; }
-#     # </style>
-#     # """
-#     # st.markdown(css, unsafe_allow_html=True)
-        
-#     # CSS for Styling
-#     custom_css = """
-#     <style>
-#     /* Main sidebar styling */
-#     [data-testid="stSidebar"] { 
-#         background-color: #1E3A8A;
-#     }
-
-#     /* Button styling */
-#     .stButton > button {
-#         background-color: #C4A747 !important;
-#         color: #1E3A8A !important;
-#         border: 2px solid #1E3A8A !important;
-#         font-weight: bold;
-#         transition: all 0.3s ease;
-#     }
-
-#     .stButton > button:hover {
-#         background-color: #1E3A8A !important;
-#         color: #C4A747 !important;
-#         border-color: #C4A747 !important;
-#     }
-
-#     /* Text input styling */
-#     [data-testid="stTextInput"] input {
-#         background-color: #F8FAFC !important;
-#         color: #1E3A8A !important;
-#         border: 2px solid #1E3A8A !important;
-#         border-radius: 8px;
-#         padding: 12px !important;
-#     }
-
-#     [data-testid="stTextInput"] input:focus {
-#         border-color: #C4A747 !important;
-#         box-shadow: 0 0 0 2px rgba(30, 58, 138, 0.2);
-#     }
-
-#     /* Placeholder text styling */
-#     [data-testid="stTextInput"] input::placeholder {
-#         color: #94A3B8 !important;
-#         opacity: 1;
-#     }
-
-#     /* Dropdown/select styling */
-#     [data-testid="stSelectbox"] div {
-#         border: 2px solid #1E3A8A !important;
-#         border-radius: 8px !important;
-#     }
-
-#     /* Text area styling */
-#     [data-testid="stTextArea"] textarea {
-#         background-color: #F8FAFC !important;
-#         border: 2px solid #1E3A8A !important;
-#         border-radius: 8px !important;
-#         color: #1E3A8A !important;
-#     }
-
-#     /* Target password input label specifically */
-#     [data-testid="stTextInput"] label {
-#     color: white !important;
-#     }
-
-#     /* For sidebar context */
-#     [data-testid="stSidebar"] [data-testid="stTextInput"] label {
-#     color: white !important;
-#     }
-
-#     /* Target date/time display specifically */
-#     [data-testid="stSidebar"] .st-emotion-cache-16txtl3 {
-#     color: white !important;
-# }
-
-#     </style>
-#     """
-#     st.markdown(custom_css , unsafe_allow_html=True)
-
-#     public_data = get_public_data()  # Load actual data
-#     show_public_components(public_data)
-
-#     # Authentication logic
-#     if 'authenticated' not in st.session_state:
-#         st.session_state.authenticated = False
-
-#     if not st.session_state.authenticated:
-#         with st.sidebar:
-#             # Sidebar components
-#             col1, col2, col3 = st.columns([1, 2, 6])
-#             col2.image(logo_path, width=140)
-            
-#             now = datetime.now()
-#             st.write(f"**Date:** {now.strftime('%d/%m/%Y')}  \n**Time:** {now.strftime('%H:%M:%S')}")
-            
-#             password = st.text_input("Admin Password", type="password")
-
-#             if st.button("Login"):
-#                 if password == st.secrets["ADMIN_PW"]:
-#                     with st.spinner(""):
-#                         st.markdown("""
-#                         <div class="spinner"></div>
-#                         <p style='text-align: center;'>Please wait loading admin data...</p>
-#                         """, unsafe_allow_html=True)
-#                         private_data = get_private_data()  # INSIDE spinner
-#                         time.sleep(1)
-#                         st.session_state.authenticated = True
-#                         if st.session_state.authenticated:
-#                             show_private_insights(private_data)
-#                         st.rerun()
-#                         if st.session_state.authenticated:
-#                             show_private_insights(private_data)
-#                 else:
-#                     st.error("Incorrect credentials")
-
-#     # Private dashboard
-#     #if st.session_state.authenticated:
-#      #   show_private_insights(private_data)  # Now uses pre-loaded data
-
-#         #Logout and data export
-#         col1, col2 = st.columns([6, 1])
-#         col2.button("🔒 Logout", on_click=lambda: st.session_state.update(authenticated=False))
-        
-#         with st.expander("Raw Data Export"):
-#             st.download_button(
-#                 label="Export Full Dataset",
-#                 data=private_data['responses'].to_csv(),
-#                 file_name="windrush_data_export.csv"
-#             )
-
-# if __name__ == "__main__":
-#     main()
-
-
-#THIS BELOW IS WORKING FINE AS OF 08/04/2025
-
-# from django.db.models import Count, Q, F, Avg, Max, Min , StdDev
-# import streamlit as st
-# import sqlite3
-# import pandas as pd
-# from textblob import TextBlob
-# import plotly.express as px
-# from geopy.geocoders import Nominatim
-# from geopy.extra.rate_limiter import RateLimiter
-# import matplotlib.pyplot as plt
-# from wordcloud import WordCloud
-# import os
-# import sys
-# import requests
-# from django.db import connection
-# import django
-# import json
-# from django.db.models import FloatField
-# from django.db.models.functions import Cast
-# from PIL import Image
-# import datetime
-# from datetime import datetime
-
-
-
-# logo ="dashboard\\images\\Windrush logo clipped1_redrawn BLUEE_v2 3.jpg"
-# logo_path = Image.open(logo) 
-# logo2 ="dashboard\\images\\Windrush Foundation 30th Anniversary 2025_R4.png"
-# logo_path_2 = Image.open(logo2) 
-
-# # Get absolute paths
-# current_dir = os.path.dirname(os.path.abspath(__file__))          # /dashboard
-# project_root = os.path.dirname(current_dir)                      # /windrush
-# backend_dir = os.path.join(project_root, "backend")              # /windrush/backend
-
-# # Add to Python path
-# sys.path.extend([
-#     project_root,    # For Django project recognition
-#     backend_dir      # For app module resolution
-# ])
-
-# # Django configuration
-# os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings")
-# django.setup()
-
-# # Now import models
-# #from evaluations.models import Participant, Response, Question
-# from evaluations.models import Participant, Response, Question, EvaluationSession 
-
-# # dashboard/main_dashboard.py
-
-# @st.cache_data(ttl=3600)
-# def get_public_data():
-#     """Aggregate data without personal identifiers"""
-#     return {
-#         'participants': Participant.objects.values('gender', 'ethnicity', 'age'),
-#         'responses': Response.objects.values('question__text', 'answer'),
-#         'sessions': EvaluationSession.objects.filter(completed=True)
-#     }
-
-# @st.cache_data(ttl=300)
-# def get_private_data():
-#     """Sensitive data only for authenticated users"""
-#     if st.session_state.get('authenticated'):
-#         return {
-#             'participants': pd.DataFrame(list(Participant.objects.all().values())),
-#             'responses': pd.DataFrame(list(Response.objects.all().values())),
-#             'sessions': EvaluationSession.objects.all()
-#         }
-#     return None
-
-
-
-
-# def show_public_components(data):
-#     """Components visible to all users"""
-#     # Success message and PDF download
-#     session_key = st.experimental_get_query_params().get('session_key', [None])[0]
-#     if session_key:
-#         st.title(':blue[Thank You for Participating!]')
-#         st.markdown(f"<div style='font-weight:bold'>in the survey for today's event. Your responses will help us improve future events.</div>",unsafe_allow_html=True)
-#         st.markdown(f"<p style='font-weight:bold'>For more Windrush Foundation events, check out our website:<a href='https://www.windrushfoundation.com/'><h5>www.windrushfoundation.com</h></a></p>",unsafe_allow_html=True)
-#         #st.markdown(
-#         #    f'[Download PDF of your anwsers](http://localhost:8000/download-pdf/{session_key})',
-#         #    unsafe_allow_html=True)
-    
-#     # Feedback Analysis (Word Cloud)
-#     with st.container():
-#         st.markdown(f"<h5 style='color:blue;font-weight:bold'>Word Cloud Community Feedback Overview</h5>", unsafe_allow_html=True)
-#         feedback_data = Response.objects.filter(question__question_type='TX').values_list('answer', flat=True)
-#         if feedback_data:
-#             text = ' '.join([d for d in feedback_data if isinstance(d, str)])
-#             wordcloud = WordCloud(width=800, height=400).generate(text)
-#             st.image(wordcloud.to_array(), caption="Common Feedback Themes")
-#         else:
-#             st.info("No text feedback available yet")
-
-# @st.cache_data(show_spinner=False)
-# def show_private_insights(_private_data):
-#     """Admin-only strategic insights"""
-#     st.header("Administrator Dashboard")
-    
-#     # Engagement Metrics
-#     with st.expander("Community Engagement Metrics", expanded=True):
-#         col1, col2, col3 = st.columns([1,4,2])
-#         with col1:
-#             total_participants = Participant.objects.count()
-#             st.metric("Total Participants", total_participants)
-            
-#         with col2:
-#             recommendation_question = Question.objects.filter(text__icontains="Would you recommend this event to a friend").first()
-#             if recommendation_question:
-#                 # Count valid responses
-#                 yes_count = Response.objects.filter(question=recommendation_question,answer__icontains="Yes" ).count()
-#                 total_responses = Response.objects.filter(question=recommendation_question).count()
-                
-#                 co1_a, col_b = st.columns(2)
-#                 if total_responses > 0:
-#                     recommend_rate = (yes_count / total_responses) * 100
-#                     with co1_a:
-#                         st.metric("Would Recommend Events to Friends", f"{recommend_rate:.1f}%",help=f"{yes_count} of {total_responses} participants said Yes")
-#                     with col_b:
-#                         st.metric("Would Not Recommend Events to Friends", f"{100-recommend_rate:.1f}%",help=f"{total_responses-yes_count} of {total_responses} participants said No")
-#                 else:
-#                     st.warning("No responses recorded for this question")
-#             else:
-#                 st.error("Recommendation question not found in database")
-
-#             # if recommendation_question:
-#             #     recommendations = Response.objects.filter(question_id='10'
-#             #      ).annotate(numeric_answer=Cast('answer', FloatField())).aggregate(('numeric_answer'))
-#             #     st.write(recommendations)
-                
-
-
-#                 # recommendations = Response.objects.filter(question=recommendation_question
-#                 # ).annotate(numeric_answer=Cast('answer', FloatField())).aggregate(recommend_rate=Avg('numeric_answer'))
-#                 # st.write(recommendations)
-#                 # st.metric("Recommendation Rate", 
-#                 #         f"{recommendations['recommend_rate']*100:.1f}%" 
-#                 #         if recommendations['recommend_rate'] else "N/A")
-                
-#         with col3:
-#             st.write("preferred event format")
-#             format_question = Question.objects.filter(text__icontains="What type of events do you prefer").first()
-#             #st.write(format_question)
-#             if format_question:
-#                 format_data = Response.objects.filter(
-#                     question_id='21'
-#                 ).values('answer').annotate(count=Count('id'))
-#                 #st.write(format_data)
-#                 col_a,col_b,col_c = st.columns(3)
-#                 with col_a:
-#                     st.metric(format_data[0].get('answer'),format_data[0].get('count'))
-#                 with col_b:
-#                     st.metric(format_data[1].get('answer'),format_data[1].get('count'))
-#                 with col_c:
-#                     st.metric(format_data[1].get('answer'),format_data[1].get('count'))
-#                 #format_data=format_data[1].get('"Offline"')
-#                 #st.metric(format_data,"Preferred Event Formats")
-#                 # fig = px.pie(format_data, names='answer', values='count', 
-#                 #            title="Preferred Event Formats")
-#                 #st.plotly_chart(fig, use_container_width=True)
-#                 #question=format_question 
-
-#     # Demographic Insights
-#     with st.expander("Demographic Analysis", expanded=True):
-#         col1, col2,col3 = st.columns(3)
-#         with col1:
-#             # For age distribution chart
-#             age_data = Participant.objects.values('age').annotate(count=Count('id'))
-#             if age_data.exists():
-#                 fig = px.bar(
-#                 age_data, 
-#                 x='age', 
-#                 y='count',
-#                 title="Age Group Distribution",
-#                 category_orders={"age": [choice[0] for choice in Participant.AGE_RANGES]}
-#                 )
-#                 st.plotly_chart(fig)
-#             # age_data = Participant.objects.values('age').annotate(count=Count('id'))
-#             # if age_data:
-#             #     fig = px.histogram(age_data, x='age', y='count', 
-#             #                      title="Age Distribution")
-#             #     st.plotly_chart(fig, use_container_width=True)
-       
-#         with col2:
-#             demo_data = Participant.objects.values('gender', 'ethnicity').annotate(count=Count('id'))
-#             if demo_data.exists():
-#                 fig = px.sunburst(demo_data, path=['gender', 'ethnicity'], 
-#                                 values='count', title="Demographic Breakdown")
-#                 st.plotly_chart(fig, use_container_width=True)
-#         with col3:
-#             #st.markdown("**Gender Distribution**")
-#             # Get gender counts from database
-#             gender_data = Participant.objects.values('gender').annotate(count=Count('id'))
-#             if gender_data.exists():
-#                 fig, ax = plt.subplots(figsize=(6, 5))  # Slightly taller height
-#                 # Extract labels and counts
-#                 genders = [item['gender'] for item in gender_data]
-#                 counts = [item['count'] for item in gender_data]#
-#                 st.write("Counts",counts[2])
-#             # Create plot
-#                 fig, ax = plt.subplots()
-#                 ax.barh(genders, counts, color=['#1E3A8A', '#C4A747', '#94A3B8'])  # Horizontal bar chart
-#             # Formatting
-#                 plt.subplots_adjust(top=0.55)  # Reduced from default 0.9
-#                 ax.set_xlabel('Number of Participants',size=15)
-#                 ax.set_ylabel('Gender',size=15)
-#                 ax.set_title('Participant Gender Distribution', size=20, y=1.35)
-#                 plt.tight_layout()
-#                 #st.header(" ")
-#                 st.pyplot(fig)
-#             else:
-#                 st.info("No gender data available")
-        
-#         col1, col2, col3 = st.columns(3)
-
-# # === Left Column: Age Metrics ===
-#         with col1:
-#             st.subheader("Age Overview")
-#             avg_age_data = Participant.objects.aggregate(avg_age=Avg('age'))
-#             avg_age = avg_age_data['avg_age']
-            
-#             age_extremes = Participant.objects.aggregate(max_age=Max('age'),min_age=Min('age'))
-#             max_age = age_extremes['max_age']
-#             min_age = age_extremes['min_age']
-            
-#             #Will use trhe below when I move over to postgre SQL
-#             # age_stats = Participant.objects.aggregate(std_dev=StdDev('age'))
-#             # std_dev = age_stats['std_dev']
-#             # st.write(std_dev)
-            
-
-#             # Nested horizontal layout for age metrics
-#             age_col1, age_col2, age_col3 = st.columns(3)
-#             age_col1.metric("Min. Age", f"{min_age:.1f} Yrs" if isinstance(min_age, (int, float)) else min_age or "N/A")
-#             age_col2.metric("Avg. Age", f"{avg_age:.1f}" if isinstance(avg_age, (int, float)) else avg_age or "N/A")
-#             age_col3.metric("Max. Age", f"{max_age:.1f} Yrs" if isinstance(max_age, (int, float)) else max_age or "N/A")
-            
-#         # === Right Column: Gender Count Metrics ===
-#         with col3:
-#             st.subheader("Gender Distribution")
-#             if counts is not None and len(counts) >= 3:
-#                 g_col1, g_col2, g_col3 = st.columns(3)
-#                 g_col1.metric("Males", counts[1])
-#                 g_col2.metric("Females", counts[0])
-#                 g_col3.metric("Other/NA", counts[2])
-
-
-#     with st.expander("Visitor Origins Analysis", expanded=True):
-#         tab1, tab2 = st.tabs(["Geospatial Heatmap", "Demographic Overlay"])
-        
-#         with tab1:
-#             st.subheader("Visitor Travel Origins Heatmap")
-            
-#             # Get postcode data with rate limiting
-#             postcodes = Participant.objects.exclude(postcode__exact='').values_list('postcode', flat=True)
-            
-#             if postcodes:
-#                 # Geocode postcodes
-#                 geolocator = Nominatim(user_agent="windrush_geo")
-#                 geocode = RateLimiter(geolocator.geocode, min_delay_seconds=1)
-                
-#                 locations = []
-#                 for postcode in postcodes:
-#                     try:
-#                         location = geocode(postcode)
-#                         if location:
-#                             locations.append({
-#                                 "postcode": postcode,
-#                                 "lat": location.latitude,
-#                                 "lon": location.longitude
-#                             })
-#                     except:
-#                         continue
-                
-#                 if locations:
-#                     # Create density map
-#                     df = pd.DataFrame(locations)
-#                     fig = px.density_mapbox(
-#                         df,
-#                         lat='lat',
-#                         lon='lon',
-#                         radius=10,
-#                         zoom=5,
-#                         mapbox_style="stamen-terrain",
-#                         title="Geographic Distribution of Visitor Origins",
-#                         height=600
-#                     )
-#                     fig.update_layout(
-#                         mapbox_style="carto-positron",
-#                         mapbox_zoom=5,
-#                         mapbox_center={"lat": 54.00366, "lon": -2.547855}
-#                     )
-#                     st.plotly_chart(fig, use_container_width=True)
-#                 else:
-#                     st.warning("Could not geocode postcode data")
-#             else:
-#                 st.info("No postcode data available in responses")
-
-#         with tab2:
-#             st.subheader("Demographic Overlay Analysis")
-#             # Add demographic overlay visualizations here
-
-
-#     with st.expander("Performance Metrics", expanded=True):
-#         tab1, tab2, tab3 = st.tabs(["Drop-off Rates", "Accessibility", "Marketing"])
-        
-#         with tab1:
-#             total_sessions = EvaluationSession.objects.count()
-#             completed_sessions = EvaluationSession.objects.filter(completed=True).count()
-#             dropoff_rate = ((total_sessions - completed_sessions) / total_sessions * 100 
-#                          if total_sessions else 0)
-#             st.metric("Form Drop-off Rate", f"{dropoff_rate:.1f}%")
-
-#         with tab2:
-#             accessibility_data = Participant.objects.values(
-#                 'accessibility_needs'
-#             ).annotate(count=Count('id'))
-#             if accessibility_data.exists():
-#                 fig = px.bar(accessibility_data, x='accessibility_needs', y='count',
-#                            title="Accessibility Requirements")
-#                 st.plotly_chart(fig, use_container_width=True)
-
-#         with tab3:
-#             # In your Streamlit dashboard code (main_dashboard.py)
-
-#             st.subheader("Participant Referral Sources")
-    
-#     # Get all referral sources with case-insensitive cleaning
-#             referrals = Participant.objects.exclude(referral_source__exact='').values_list('referral_source', flat=True)
-    
-#             if referrals.exists():
-#         # Debug: Show unique referral sources
-#                 #st.write("Found referral sources:", set(referrals))
-        
-#         # Normalize and categorize
-#                 referral_map = {'social': ['instagram', 'facebook', 'twitter', 'social'],
-#                                 'word of mouth': ['friend', 'family', 'word', 'colleague'],
-#                                 'email': ['email', 'newsletter'],
-#                                 'website': ['website', 'web', 'online'],
-#                                 'event': ['event', 'festival', 'exhibition']}
-        
-#                 categorized = {'Other': 0}
-#                 for source in referrals:
-#                     source_lower = str(source).lower()
-#                     matched = False
-#                     for category, keywords in referral_map.items():
-#                         if any(keyword in source_lower for keyword in keywords):
-#                             categorized[category] = categorized.get(category, 0) + 1
-#                             matched = True
-#                             break
-#                     if not matched:
-#                         categorized['Other'] += 1
-                
-#         # Create visualization
-#                 fig = px.pie(names=list(categorized.keys()),values=list(categorized.values()),title="Referral Source Breakdown",hole=0.3)
-#                 st.plotly_chart(fig, use_container_width=True)
-        
-#             else:
-#                 st.info("No referral sources recorded in participant responses")
-        
-#     with st.expander("Private Data", expanded=True):
-#         tab1, tab2 = st.tabs(["Private Data", "Sentiment Analysis"])
-#         with tab1:
-#             private_data = get_private_data()
-#             st.write("Private Data", private_data['responses'])
-#         with tab2:
-#             text_responses = Response.objects.filter(question_id='15').values_list('answer', flat=True)
-#             tr=sentiment_analysis(text_responses)
-#             st.write("Sentiment Analysis",tr)
-        
-
-# def sentiment_analysis(text_responses):
-#     sentiments = []
-#     for text in text_responses:
-#         analysis = TextBlob(text)
-#         sentiments.append({
-#             'text': text,
-#             'polarity': analysis.sentiment.polarity,
-#             'subjectivity': analysis.sentiment.subjectivity
-#         })
-#     return pd.DataFrame(sentiments)      
-
-
-# from datetime import datetime
-
-# def main():
-#     st.set_page_config(
-#         page_title="Windrush Insights",
-#         layout="wide",
-#         page_icon="📊"
-#     )
-
-#     # CSS for Styling
-#     # CSS for Styling
-#     custom_css = """
-#     <style>
-#     /* Main sidebar styling */
-#     [data-testid="stSidebar"] { 
-#         background-color: #1E3A8A;
-#     }
-
-#     /* Button styling */
-#     .stButton > button {
-#         background-color: #C4A747 !important;
-#         color: #1E3A8A !important;
-#         border: 2px solid #1E3A8A !important;
-#         font-weight: bold;
-#         transition: all 0.3s ease;
-#     }
-
-#     .stButton > button:hover {
-#         background-color: #1E3A8A !important;
-#         color: #C4A747 !important;
-#         border-color: #C4A747 !important;
-#     }
-
-#     /* Text input styling */
-#     [data-testid="stTextInput"] input {
-#         background-color: #F8FAFC !important;
-#         color: #1E3A8A !important;
-#         border: 2px solid #1E3A8A !important;
-#         border-radius: 8px;
-#         padding: 12px !important;
-#     }
-
-#     [data-testid="stTextInput"] input:focus {
-#         border-color: #C4A747 !important;
-#         box-shadow: 0 0 0 2px rgba(30, 58, 138, 0.2);
-#     }
-
-#     /* Placeholder text styling */
-#     [data-testid="stTextInput"] input::placeholder {
-#         color: #94A3B8 !important;
-#         opacity: 1;
-#     }
-
-#     /* Dropdown/select styling */
-#     [data-testid="stSelectbox"] div {
-#         border: 2px solid #1E3A8A !important;
-#         border-radius: 8px !important;
-#     }
-
-#     /* Text area styling */
-#     [data-testid="stTextArea"] textarea {
-#         background-color: #F8FAFC !important;
-#         border: 2px solid #1E3A8A !important;
-#         border-radius: 8px !important;
-#         color: #1E3A8A !important;
-#     }
-
-#     /* Target password input label specifically */
-#     [data-testid="stTextInput"] label {
-#     color: white !important;
-#     }
-
-#     /* For sidebar context */
-#     [data-testid="stSidebar"] [data-testid="stTextInput"] label {
-#     color: white !important;
-#     }
-
-#     /* Target date/time display specifically */
-#     [data-testid="stSidebar"] .st-emotion-cache-16txtl3 {
-#     color: white !important;
-# }
-
-#     </style>
-#     """
-
-#     st.markdown(custom_css, unsafe_allow_html=True)
-    
-#     # Public components
-#     public_data = get_public_data()
-#     show_public_components(public_data)
-
-#     # Authentication check
-#     if 'authenticated' not in st.session_state:
-#         st.session_state.authenticated = False
-        
-#     if not st.session_state.authenticated:
-#         with st.sidebar:
-#             col1,col2,col3=st.columns([1,2,6])
-#             with col2:
-#                 st.image(logo_path,width=140)
-            
-#             now = datetime.now()
-#             xtime = now.strftime("%H:%M:%S")
-#             today = datetime.today()
-#             xdate=today.strftime("%d/%m/%Y")
-            
-#             st.write(f"{xdate} || {xtime}")
-#             password = st.text_input("Admin Password", type="password")
-#             if st.button("Login"):
-#                 if password == st.secrets["ADMIN_PW"]:
-#                     st.session_state.authenticated = True
-#                     st.rerun()
-#                 else:
-#                     st.error("Incorrect password")
-#             col1,col2,col3=st.columns([1,2,6])
-#             with col2:
-#                 st.image(logo_path_2,width=120)
-
-#     # Private components
-   
-#     ######################################################
-#     #elif  st.session_state.authenticated == False
-#     if st.session_state.authenticated:
-#         private_data = get_private_data()
-#         show_private_insights(private_data)
-        
-
-#     # ⬇️ Place logout button visibly (e.g. top right or bottom)
-#         col1, col2 = st.columns([6, 1])
-#         with col2:
-#             if st.button("🔓 Logout", key="logout"):
-#                 st.session_state.authenticated = False
-#                 st.rerun()
-
-#         # Data Export Section
-#         st.divider()
-#         with st.expander("Raw Data Export"):
-#             st.download_button(
-#                 label="Download Full Dataset (CSV)",
-#                 data=private_data['responses'].to_csv(),
-#                 file_name="windrush_full_data.csv")
-
-#     else:
-#         st.info("🔐 Admin authentication required for detailed insights")
-
-
-# if __name__ == "__main__":
-#     main()
-
-
-
-
-
