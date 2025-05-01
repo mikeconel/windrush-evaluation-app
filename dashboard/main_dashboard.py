@@ -20,8 +20,8 @@ from datetime import datetime
 
 logo = "dashboard/images/Windrush logo clipped1_redrawn BLUEE_v2 3_R1.png"
 logo_path = Image.open(logo) 
-#logo2 = "dashboard\\images\\Windrush Foundation 30th Anniversary 2025_R4.png"
-#logo_path_2 = Image.open(logo2)
+logo2 = "dashboard/images/Windrush Foundation 30th Anniversary 2025_R4.png"
+logo_path_2 = Image.open(logo2)
 
 # Configure Django environment
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -815,7 +815,7 @@ def main():
                 else:
                     st.write("Incorrect credentials, try again.")
             
-            #col2.image(logo_path_2, width=120)
+            col2.image(logo_path_2, width=120)
 
     # Private dashboard
     if st.session_state.authenticated:
