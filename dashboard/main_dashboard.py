@@ -193,13 +193,15 @@ def show_private_insights(_private_data):
         
         # Participants Metric
         with col1:
+            st.write("Mikes participants")
             participants = Participant.objects.all().values('created_at')
-            show_metric(
-                participants, 
-                title="Participants",
-                date_column='created_at',
-                value_column='count'
-            )
+            if participants:
+                show_metric(
+                    participants, 
+                    title="Participants",
+                    date_column='created_at',
+                    value_column='count'
+                )
         
         # Recommendation Rate Metric
         with col2:
