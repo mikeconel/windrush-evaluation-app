@@ -170,8 +170,8 @@ def show_metric(data, title, date_column='created_at', value_column='count'):
    
     # Filter data
     filtered = df[
-        (df[date_column] >= start_date) & 
-        (df[date_column] <= end_date)
+        (df[date_column] >= '2025-04-02 15:46:00') & 
+        (df[date_column] <= '2025-04-12 14:10:45')
     ]
     
     if filtered.empty:
