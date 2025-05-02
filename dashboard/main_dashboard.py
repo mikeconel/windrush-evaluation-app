@@ -161,11 +161,13 @@ def show_metric(data, title, date_column='created_at', value_column='count'):
     # Create count data if needed
     if value_column not in df.columns:
         df = df.groupby(date_column).size().reset_index(name=value_column)
+        st.write("My unfiltered count",df)
     
     start_date, end_date = get_date_range(df, date_column)
     if not start_date or not end_date:
         return
-    
+        
+    st.write("This is my Un-filter data",filtered)
     # Filter data
     filtered = df[
         (df[date_column] >= start_date) & 
@@ -175,7 +177,7 @@ def show_metric(data, title, date_column='created_at', value_column='count'):
     if filtered.empty:
         st.warning(f"No {title} in selected date range")
         return
-    st.write("This is my filter",filtered)
+    
     
     # Display metrics
     total = filtered[value_column].sum()
