@@ -151,7 +151,7 @@ def show_metric(data, title, date_column='created_at', value_column='count'):
     """Reusable metric component with date filtering"""
     # Convert queryset to DataFrame
     df = pd.DataFrame(list(data))
-    st.write("This is my display metrics Function",df)
+    #st.write("This is my display metrics Function",df)
     
     # Check for required columns
     if df.empty or date_column not in df.columns:
@@ -175,6 +175,7 @@ def show_metric(data, title, date_column='created_at', value_column='count'):
     if filtered.empty:
         st.warning(f"No {title} in selected date range")
         return
+    st.write("This is my filter",filtered)
     
     # Display metrics
     total = filtered[value_column].sum()
