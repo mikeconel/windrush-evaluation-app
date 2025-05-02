@@ -191,7 +191,7 @@ def show_metric(data, title, date_column='created_at', value_column='count'):
 
     return total  # Fixed return statement
 
-def show_private_insights():
+def show_private_insights(_private_data):
     """Admin analytics dashboard"""
     st.header("Administrator Dashboard")
 
