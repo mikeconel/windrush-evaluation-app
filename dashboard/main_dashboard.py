@@ -122,15 +122,15 @@ def show_public_components(data):
 
 def get_date_range(data, date_column='created_at'):
     """Universal date range selector component"""
-    df = pd.DataFrame(list(data))
+    participant_list = list(data)  # Explicitly convert QuerySet to a list
+    df = pd.DataFrame.from_records(participant_list)  # Ensure correct conversion
 
     st.write("Debug: Raw DataFrame", df)  # Debugging
-
+    
     if df.empty:
         st.warning("No data found.")
         return None, None
 
-    # Verify column names
     if date_column not in df.columns:
         st.error(f"Column '{date_column}' not found in DataFrame. Available columns: {df.columns}")
         return None, None
@@ -158,10 +158,9 @@ def get_date_range(data, date_column='created_at'):
         return pd.to_datetime(date_range[0]), pd.to_datetime(date_range[1])
     return None, None
 
-
 def show_metric(data, title, date_column='created_at', value_column='count'):
     """Reusable metric component with date filtering"""
-    df = pd.DataFrame(list(data))
+    df = pd.DataFrame.from_records(list(data))  # Ensure correct conversion
     st.write("Debug: Displaying Data in show_metric", df)  # Debugging
 
     # Check for required columns
@@ -184,8 +183,6 @@ def show_metric(data, title, date_column='created_at', value_column='count'):
         (df[date_column] <= end_date)
     ]
     st.write("Debug: Filtered Data:", filtered)  # Debugging
-    
-
 
     if filtered.empty:
         st.warning(f"No {title} in selected date range")
@@ -202,7 +199,7 @@ def show_metric(data, title, date_column='created_at', value_column='count'):
 
     return total  # Fixed return statement
 
-def show_private_insights(_private_data):
+def show_private_insights():
     """Admin analytics dashboard"""
     st.header("Administrator Dashboard")
 
@@ -212,10 +209,6 @@ def show_private_insights(_private_data):
         # Participants Metric
         with col1:
             participants = Participant.objects.all().values('created_at')
-            participant_list = list(Participant.objects.all().values('created_at'))
-            df = pd.DataFrame(participant_list)
-            st.write("Debug: DataFrame Columns:", df.columns)
-
             st.write("Debug: Participants Data", participants)  # Debugging
             if participants:
                 show_metric(
@@ -242,7 +235,7 @@ def show_private_insights(_private_data):
                 )
 
                 # Calculate recommendation rate
-                response_df = pd.DataFrame(list(responses))
+                response_df = pd.DataFrame.from_records(list(responses))  # Ensure correct conversion
                 if not response_df.empty:
                     yes_responses = response_df[response_df['answer'].str.contains("Yes", case=False)]
                     rec_rate = (len(yes_responses) / len(response_df)) * 100 if len(response_df) > 0 else 0
