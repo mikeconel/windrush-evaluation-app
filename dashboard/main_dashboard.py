@@ -130,8 +130,8 @@ def get_date_range(data, date_column='created_at'):
     
     try:
         df[date_column] = pd.to_datetime(df[date_column])
-        min_date = df[date_column].min()
-        max_date = df[date_column].max()
+        min_date = df[date_column].min().date()
+        max_date = df[date_column].max().date()
     except KeyError:
         st.error(f"Column '{date_column}' not found in data")
         return None, None
