@@ -123,17 +123,23 @@ def show_public_components(data):
 def get_date_range(data, date_column='created_at'):
     """Universal date range selector component"""
     df = pd.DataFrame(list(data))
-    
-    # Debugging statements
-    st.write("Debug: Raw DataFrame", df)
-    
-    if df.empty or date_column not in df.columns:
-        st.warning("No valid date column found.")
+
+    st.write("Debug: Raw DataFrame", df)  # Debugging
+
+    if df.empty:
+        st.warning("No data found.")
+        return None, None
+
+    # Verify column names
+    if date_column not in df.columns:
+        st.error(f"Column '{date_column}' not found in DataFrame. Available columns: {df.columns}")
         return None, None
 
     try:
+        df.dropna(subset=[date_column], inplace=True)  # Drop missing values
         df[date_column] = pd.to_datetime(df[date_column], errors='coerce')
         st.write("Debug: Converted Date Column", df[date_column])  # Debugging
+
         min_date = df[date_column].dropna().min().date()
         max_date = df[date_column].dropna().max().date()
         st.write("Debug: Min/Max Dates:", min_date, max_date)
@@ -178,6 +184,8 @@ def show_metric(data, title, date_column='created_at', value_column='count'):
         (df[date_column] <= end_date)
     ]
     st.write("Debug: Filtered Data:", filtered)  # Debugging
+    
+
 
     if filtered.empty:
         st.warning(f"No {title} in selected date range")
@@ -204,6 +212,10 @@ def show_private_insights(_private_data):
         # Participants Metric
         with col1:
             participants = Participant.objects.all().values('created_at')
+            participant_list = list(Participant.objects.all().values('created_at'))
+            df = pd.DataFrame(participant_list)
+            st.write("Debug: DataFrame Columns:", df.columns)
+
             st.write("Debug: Participants Data", participants)  # Debugging
             if participants:
                 show_metric(
