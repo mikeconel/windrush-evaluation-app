@@ -119,91 +119,106 @@ def show_public_components(data):
         else:
             st.info("No text feedback available yet")
 
+
+def get_date_range(data, date_column='created_at'):
+    """Universal date range selector component"""
+    df = pd.DataFrame(list(data))
+    if df.empty:
+        return None, None
+    
+    df[date_column] = pd.to_datetime(df[date_column])
+    min_date = df[date_column].min().date()
+    max_date = df[date_column].max().date()
+    
+    date_range = st.date_input(
+        "Select Date Range",
+        value=[min_date, max_date],
+        min_value=min_date,
+        max_value=max_date
+    )
+    
+    if len(date_range) == 2:
+        return pd.to_datetime(date_range[0]), pd.to_datetime(date_range[1])
+    return None, None
+
+def show_metric(data, title, date_column='created_at', value_column='participants'):
+    """Reusable metric component with date filtering"""
+    if data.empty:
+        st.warning(f"No {title} data available")
+        return
+    
+    start_date, end_date = get_date_range(data, date_column)
+    if not start_date or not end_date:
+        return
+    
+    # Filter data
+    filtered = data[
+        (data[date_column] >= start_date) & 
+        (data[date_column] <= end_date)
+    ]
+    
+    if filtered.empty:
+        st.warning(f"No {title} in selected date range")
+        return
+    
+    # Display metrics
+    st.metric(f"Total {title}", filtered[value_column].sum())
+    
+    # Show chart toggle
+    if st.button(f"Show {title} timeline", key=f"{title}_chart"):
+        daily_counts = filtered.groupby(filtered[date_column].dt.date)[value_column].sum().reset_index()
+        st.line_chart(daily_counts.set_index(date_column))
+
 def show_private_insights(_private_data):
     """Admin analytics dashboard"""
     st.header("Administrator Dashboard")
-    global private_data
     
-    # Engagement Metrics
     with st.expander("Community Engagement Metrics", expanded=True):
         col1, col2, col3 = st.columns([1, 4, 2])
         
-        # Total Participants
+        # Participants Metric
         with col1:
-            # Fetch participant data
-            result = Participant.objects.all().values('created_at')  # Get actual participant records with timestamps
-            df = pd.DataFrame(list(result))
-            if df.empty:
-                st.warning("No participant data available")
-                return
-
-            # Convert to datetime and sort
-            df['created_at'] = pd.to_datetime(df['created_at'])
-            df = df.sort_values('created_at')
-        
-            # Create daily count DataFrame
-            daily_counts = df.groupby(df['created_at'].dt.date).size().reset_index(name='count')
-            daily_counts.columns = ['date', 'participants']
-        
-            # Date range picker
-            min_date = daily_counts['date'].min()
-            max_date = daily_counts['date'].max()
-        
-            date_range = st.date_input(
-                "Select Date Range",
-                value=[min_date, max_date],
-                min_value=min_date,
-                max_value=max_date
+            participants = pd.DataFrame(list(
+                Participant.objects.all().values('created_at')
+            ))
+            show_metric(
+                participants, 
+                title="Participants",
+                value_column='created_at'  # Will count occurrences
             )
-
-            # Filter data
-            if len(date_range) == 2:
-                mask = (
-                    (daily_counts['date'] >= date_range[0]) &
-                    (daily_counts['date'] <= date_range[1])
-                )
-                filtered_df = daily_counts.loc[mask]
-
-                if not filtered_df.empty:
-                    total_participants = filtered_df['participants'].sum()
-                    st.metric("Total Participants in Period", total_participants)
-                
-                    # Display timeline chart
-                    st.line_chart(filtered_df.set_index('date')['participants'])
-                else:
-                    st.warning("No records found in selected date range")
-            else:
-                st.error("Please select a valid date range")
-    
-    # Engagement Metrics
-    #with st.expander("Community Engagement Metrics", expanded=True):
-        #col1, col2, col3 = st.columns([1, 4, 2])
         
-        # Total Participants
-        #with col1:
-            #total = Participant.objects.count()
-            #st.metric("Total Participants", total)
-        
-        # Recommendation Rate
+        # Recommendation Rate Metric
         with col2:
-            question = Question.objects.filter(text__icontains="recommend this event to a friend").first()
+            question = Question.objects.filter(
+                text__icontains="recommend this event to a friend"
+            ).first()
+            
             if question:
-                responses = Response.objects.filter(question=question)
-                yes_count = responses.filter(answer__icontains="Yes").count()
-                total_responses = responses.count()
+                responses = pd.DataFrame(list(
+                    Response.objects.filter(question=question).values(
+                        'created_at', 'answer'
+                    )
+                ))
                 
-                if total_responses > 0:
-                    rate = (yes_count / total_responses) * 100
+                if not responses.empty:
+                    # Calculate recommendation rate
+                    yes_responses = responses[responses['answer'].str.contains("Yes", case=False)]
+                    rec_rate = (len(yes_responses) / len(responses)) * 100
+                    
                     col_a, col_b = st.columns(2)
-                    col_a.metric("Would Recommend", f"{rate:.1f}%", 
-                               help=f"{yes_count} positive responses")
-                    col_b.metric("Would Not Recommend", f"{100-rate:.1f}%",
-                               help=f"{total_responses - yes_count} negative responses")
+                    col_a.metric("Would Recommend", f"{rec_rate:.1f}%")
+                    col_b.metric("Would Not Recommend", f"{100-rec_rate:.1f}%")
+                    
+                    # Show response timeline
+                    show_metric(
+                        responses,
+                        title="Recommendation Responses",
+                        value_column='answer'  # Will count responses
+                    )
                 else:
                     st.warning("No recommendation responses")
             else:
-                st.error("Recommendation question not found")
-        
+                st.error("Recommendation question not found")        
         # Event Preferences
         #
         # with col3:
