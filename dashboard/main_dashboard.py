@@ -196,14 +196,14 @@ def show_private_insights(_private_data):
         with col1:
             participants = Participant.objects.all().values('created_at')
             if participants:
-                new_data=get_date_range(participants, date_column='created_at)
+                new_data=get_date_range(participants, date_column='created_at')
                                
-                #show_metric(
-                 #   participants, 
-                  #  title="Participants",
-                   # date_column='created_at',
-                    #value_column='count'
-                #)
+                show_metric(
+                    participants, 
+                    title="Participants",
+                    date_column='created_at',
+                    value_column='count'
+                )
         
         # Recommendation Rate Metric
         with col2:
