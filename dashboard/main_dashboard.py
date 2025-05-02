@@ -164,10 +164,10 @@ def show_metric(data, title, date_column='created_at', value_column='count'):
         
     
     start_date, end_date = get_date_range(df, date_column)
+    st.write("\nThis is my DATES:",start_date, end_date)
     if not start_date or not end_date:
         return
-        
-    st.write("This is my DATES:",start_date, end_date)
+   
     # Filter data
     filtered = df[
         (df[date_column] >= start_date) & 
