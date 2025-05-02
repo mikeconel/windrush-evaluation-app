@@ -149,22 +149,20 @@ def get_date_range(data, date_column='created_at'):
 
 def show_metric(data, title, date_column='created_at', value_column='count'):
     """Reusable metric component with date filtering"""
-    # Convert queryset to DataFrame
     df = pd.DataFrame(list(data))
-    #st.write("This is my display metrics Function",df)
-    
+    st.write("Debug: Displaying Data in show_metric", df)
+
     # Check for required columns
     if df.empty or date_column not in df.columns:
         st.warning(f"No {title} data available")
         return
     
-    # Create count data if needed
+    # Ensure value_column exists
     if value_column not in df.columns:
         df = df.groupby(date_column).size().reset_index(name=value_column)
-        
     
     start_date, end_date = get_date_range(df, date_column)
-    #st.write("\nThis is my DATES:",start_date, end_date)
+    st.write("\nDebug: Selected Dates:", start_date, end_date)
     if not start_date or not end_date:
         return
    
@@ -173,23 +171,22 @@ def show_metric(data, title, date_column='created_at', value_column='count'):
         (df[date_column] >= start_date) & 
         (df[date_column] <= end_date)
     ]
-    st.write(filtered)
+    st.write("Debug: Filtered Data:", filtered)
     
     if filtered.empty:
         st.warning(f"No {title} in selected date range")
         return
     
-    
     # Display metrics
     total = filtered[value_column].sum()
-    st.write("MIKES debug total:",total)
     st.metric(f"Total {title}", total)
-    
+
     # Show chart toggle
     if st.button(f"Show {title} timeline", key=f"{title}_chart"):
         daily_counts = filtered.groupby(filtered[date_column].dt.date)[value_column].sum().reset_index()
         st.line_chart(daily_counts.set_index(date_column))
-    return total
+    
+    return total  # Fixed the return statement
 
 def show_private_insights(_private_data):
     """Admin analytics dashboard"""
@@ -201,9 +198,8 @@ def show_private_insights(_private_data):
         # Participants Metric
         with col1:
             participants = Participant.objects.all().values('created_at')
+            st.write("Debug: Participants Data", participants)  # Added debug print
             if participants:
-                new_data=get_date_range(participants, date_column='created_at')
-                               
                 show_metric(
                     participants, 
                     title="Participants",
@@ -219,6 +215,7 @@ def show_private_insights(_private_data):
             
             if question:
                 responses = Response.objects.filter(question=question).values('created_at', 'answer')
+                st.write("Debug: Recommendation Responses", responses)  # Added debug print
                 show_metric(
                     responses,
                     title="Recommendation Responses",
@@ -238,7 +235,8 @@ def show_private_insights(_private_data):
                 else:
                     st.warning("No recommendation responses")
             else:
-                st.error("Recommendation question not found")      
+                st.error("Recommendation question not found")
+      
         # Event Preferences
         #
         # with col3:
