@@ -177,7 +177,8 @@ def show_metric(data, title, date_column='created_at', value_column='count'):
     
     # Display metrics
     total = filtered[value_column].sum()
-    result=st.metric(f"Total {title}", total)
+    st.write("MIKES debug total:",total)
+    st.metric(f"Total {title}", total)
     
     # Show chart toggle
     if st.button(f"Show {title} timeline", key=f"{title}_chart"):
