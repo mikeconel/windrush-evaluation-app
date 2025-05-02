@@ -164,7 +164,7 @@ def show_metric(data, title, date_column='created_at', value_column='count'):
         
     
     start_date, end_date = get_date_range(df, date_column)
-    st.write("\nThis is my DATES:",start_date, end_date)
+    #st.write("\nThis is my DATES:",start_date, end_date)
     if not start_date or not end_date:
         return
    
@@ -173,6 +173,7 @@ def show_metric(data, title, date_column='created_at', value_column='count'):
         (df[date_column] >= '2025-04-02 15:46:00') & 
         (df[date_column] <= '2025-04-12 14:10:45')
     ]
+    st.write(filtered)
     
     if filtered.empty:
         st.warning(f"No {title} in selected date range")
