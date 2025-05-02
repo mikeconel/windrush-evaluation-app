@@ -177,12 +177,13 @@ def show_metric(data, title, date_column='created_at', value_column='count'):
     
     # Display metrics
     total = filtered[value_column].sum()
-    st.metric(f"Total {title}", total)
+    result=st.metric(f"Total {title}", total)
     
     # Show chart toggle
     if st.button(f"Show {title} timeline", key=f"{title}_chart"):
         daily_counts = filtered.groupby(filtered[date_column].dt.date)[value_column].sum().reset_index()
         st.line_chart(daily_counts.set_index(date_column))
+    return result
 
 def show_private_insights(_private_data):
     """Admin analytics dashboard"""
