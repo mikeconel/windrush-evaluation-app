@@ -123,12 +123,18 @@ def show_public_components(data):
 def get_date_range(data, date_column='created_at'):
     """Universal date range selector component"""
     df = pd.DataFrame(list(data))
-    if df.empty:
+    
+    # Check for empty data and required columns
+    if df.empty or date_column not in df.columns:
         return None, None
     
-    df[date_column] = pd.to_datetime(df[date_column])
-    min_date = df[date_column].min().date()
-    max_date = df[date_column].max().date()
+    try:
+        df[date_column] = pd.to_datetime(df[date_column])
+        min_date = df[date_column].min().date()
+        max_date = df[date_column].max().date()
+    except KeyError:
+        st.error(f"Column '{date_column}' not found in data")
+        return None, None
     
     date_range = st.date_input(
         "Select Date Range",
@@ -141,20 +147,28 @@ def get_date_range(data, date_column='created_at'):
         return pd.to_datetime(date_range[0]), pd.to_datetime(date_range[1])
     return None, None
 
-def show_metric(data, title, date_column='created_at', value_column='participants'):
+def show_metric(data, title, date_column='created_at', value_column='count'):
     """Reusable metric component with date filtering"""
-    if data.empty:
+    # Convert queryset to DataFrame
+    df = pd.DataFrame(list(data))
+    
+    # Check for required columns
+    if df.empty or date_column not in df.columns:
         st.warning(f"No {title} data available")
         return
     
-    start_date, end_date = get_date_range(data, date_column)
+    # Create count data if needed
+    if value_column not in df.columns:
+        df = df.groupby(date_column).size().reset_index(name=value_column)
+    
+    start_date, end_date = get_date_range(df, date_column)
     if not start_date or not end_date:
         return
     
     # Filter data
-    filtered = data[
-        (data[date_column] >= start_date) & 
-        (data[date_column] <= end_date)
+    filtered = df[
+        (df[date_column] >= start_date) & 
+        (df[date_column] <= end_date)
     ]
     
     if filtered.empty:
@@ -162,7 +176,8 @@ def show_metric(data, title, date_column='created_at', value_column='participant
         return
     
     # Display metrics
-    st.metric(f"Total {title}", filtered[value_column].sum())
+    total = filtered[value_column].sum()
+    st.metric(f"Total {title}", total)
     
     # Show chart toggle
     if st.button(f"Show {title} timeline", key=f"{title}_chart"):
@@ -178,13 +193,12 @@ def show_private_insights(_private_data):
         
         # Participants Metric
         with col1:
-            participants = pd.DataFrame(list(
-                Participant.objects.all().values('created_at')
-            ))
+            participants = Participant.objects.all().values('created_at')
             show_metric(
                 participants, 
                 title="Participants",
-                value_column='created_at'  # Will count occurrences
+                date_column='created_at',
+                value_column='count'
             )
         
         # Recommendation Rate Metric
@@ -194,31 +208,27 @@ def show_private_insights(_private_data):
             ).first()
             
             if question:
-                responses = pd.DataFrame(list(
-                    Response.objects.filter(question=question).values(
-                        'created_at', 'answer'
-                    )
-                ))
+                responses = Response.objects.filter(question=question).values('created_at', 'answer')
+                show_metric(
+                    responses,
+                    title="Recommendation Responses",
+                    date_column='created_at',
+                    value_column='answer'
+                )
                 
-                if not responses.empty:
-                    # Calculate recommendation rate
-                    yes_responses = responses[responses['answer'].str.contains("Yes", case=False)]
-                    rec_rate = (len(yes_responses) / len(responses)) * 100
+                # Calculate recommendation rate
+                response_df = pd.DataFrame(list(responses))
+                if not response_df.empty:
+                    yes_responses = response_df[response_df['answer'].str.contains("Yes", case=False)]
+                    rec_rate = (len(yes_responses) / len(response_df)) * 100 if len(response_df) > 0 else 0
                     
                     col_a, col_b = st.columns(2)
                     col_a.metric("Would Recommend", f"{rec_rate:.1f}%")
                     col_b.metric("Would Not Recommend", f"{100-rec_rate:.1f}%")
-                    
-                    # Show response timeline
-                    show_metric(
-                        responses,
-                        title="Recommendation Responses",
-                        value_column='answer'  # Will count responses
-                    )
                 else:
                     st.warning("No recommendation responses")
             else:
-                st.error("Recommendation question not found")        
+                st.error("Recommendation question not found")      
         # Event Preferences
         #
         # with col3:
