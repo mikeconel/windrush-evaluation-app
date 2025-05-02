@@ -197,7 +197,7 @@ def show_private_insights(_private_data):
             participants = Participant.objects.all().values('created_at')
             st.write("Mikes participants:",participants)
             if participants:
-                st.write(""After IF,participants)
+                st.write("After IF,participants)
                 show_metric(
                     participants, 
                     title="Participants",
