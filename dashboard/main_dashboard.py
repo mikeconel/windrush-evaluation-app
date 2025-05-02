@@ -123,25 +123,27 @@ def show_public_components(data):
 def get_date_range(data, date_column='created_at'):
     """Universal date range selector component"""
     df = pd.DataFrame(list(data))
-    st.write("Debug: Data before date conversion", df)  # Debugging
-
-    # Check for empty data and required columns
+    
+    # Debugging statements
+    st.write("Debug: Raw DataFrame", df)
+    
     if df.empty or date_column not in df.columns:
         st.warning("No valid date column found.")
         return None, None
 
     try:
         df[date_column] = pd.to_datetime(df[date_column], errors='coerce')
-        min_date = df[date_column].min().date()
-        max_date = df[date_column].max().date()
-        st.write("Debug: Min/Max Dates:", min_date, max_date)  # Debugging
+        st.write("Debug: Converted Date Column", df[date_column])  # Debugging
+        min_date = df[date_column].dropna().min().date()
+        max_date = df[date_column].dropna().max().date()
+        st.write("Debug: Min/Max Dates:", min_date, max_date)
     except Exception as e:
         st.error(f"Error in date processing: {e}")
         return None, None
 
     date_range = st.date_input(
         "Select Date Range",
-        value=[min_date, max_date],
+        value=[min_date, max_date] if min_date and max_date else [datetime.today().date(), datetime.today().date()],
         min_value=min_date,
         max_value=max_date
     )
@@ -149,6 +151,7 @@ def get_date_range(data, date_column='created_at'):
     if len(date_range) == 2:
         return pd.to_datetime(date_range[0]), pd.to_datetime(date_range[1])
     return None, None
+
 
 def show_metric(data, title, date_column='created_at', value_column='count'):
     """Reusable metric component with date filtering"""
