@@ -132,6 +132,7 @@ def get_global_date_range():
             value=[min_date, max_date],
             key="global_date_picker"
         )
+        st.write("My SessionState Dates",st.session_state.date_range)
     return st.session_state.date_range
 
 def show_participant_metrics():
@@ -140,6 +141,7 @@ def show_participant_metrics():
     
     # Get global date range
     date_range = get_global_date_range()
+    st.write("My Date Range",date_range)
     
     if len(date_range) == 2:
         start_date, end_date = date_range
@@ -168,6 +170,7 @@ def show_recommendation_metrics():
     
     # Get global date range
     date_range = get_global_date_range()
+    st.write("My Date Range",date_range)
     
     question = Question.objects.filter(
         text__icontains="recommend this event to a friend"
