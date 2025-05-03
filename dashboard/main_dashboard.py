@@ -17,6 +17,7 @@ from datetime import datetime
 #nltk.download('punkt')
 from django.db.models import Count
 from django.db.models.functions import TruncDate
+from django.core.exceptions import ObjectDoesNotExist
 
 # Load images
 
@@ -124,18 +125,29 @@ def show_public_components(data):
 
 def handle_dates():
     """Central date range handler with persistent state"""
-    # Initialize with default dates if not exists
-    if 'date_range' not in st.session_state:
-        min_date = Participant.objects.earliest('created_at').created_at.date()
-        max_date = Participant.objects.latest('created_at').created_at.date()
-        st.session_state.date_range = [min_date, max_date]
+    # Store absolute min/max dates separately
+    if 'absolute_dates' not in st.session_state:
+        try:
+            min_date = Participant.objects.earliest('created_at').created_at.date()
+            max_date = Participant.objects.latest('created_at').created_at.date()
+            st.session_state.absolute_dates = (min_date, max_date)
+        except Participant.DoesNotExist:
+            st.error("No participant data available")
+            return
 
-    # Always show date picker and update session state
+    # Initialize with absolute dates if not set
+    if 'date_range' not in st.session_state:
+        st.session_state.date_range = [
+            st.session_state.absolute_dates[0],
+            st.session_state.absolute_dates[1]
+        ]
+
+    # Show date picker with absolute boundaries
     new_dates = st.date_input(
         "Select Date Range",
         value=st.session_state.date_range,
-        min_value=st.session_state.date_range[0],
-        max_value=st.session_state.date_range[1],
+        min_value=st.session_state.absolute_dates[0],
+        max_value=st.session_state.absolute_dates[1],
         key="global_date_picker"
     )
     
@@ -166,74 +178,78 @@ def show_participant_metrics():
         )
         if not df.empty:
             st.line_chart(df.set_index('date'))
-    except ObjectDoesNotExist:
-        st.warning("No participant data available")
+        else:
+            st.warning("No participants in selected date range")
+    except Exception as e:
+        st.warning(f"Error loading participant data: {str(e)}")
 
 def show_recommendation_metrics():
     """Recommendation rate component"""
     st.subheader("Recommendation Metrics")
     
     try:
-        responses = Response.objects.filter(
-            created_at__date__gte=st.session_state.date_range[0],
-            created_at__date__lte=st.session_state.date_range[1],
-            question__text__icontains="recommend"
+        question = Question.objects.get(
+            text__icontains="recommend this event to a friend"
         )
-        # ... rest of recommendation logic ...
-    
+        responses = Response.objects.filter(
+            question=question,
+            created_at__date__gte=st.session_state.date_range[0],
+            created_at__date__lte=st.session_state.date_range[1]
+        )
         
         if responses.exists():
-            # Convert to DataFrame
-            df = pd.DataFrame(list(responses.values('answer', 'created_at')))
-            df['created_at'] = pd.to_datetime(df['created_at'])
+            df = pd.DataFrame(
+                responses.values('answer', 'created_at')
+                .annotate(date=TruncDate('created_at'))
+                .values('date', 'answer')
+            )
             
-            # Calculate rates
             yes_count = df[df['answer'].str.contains("Yes", case=False)].shape[0]
             total = df.shape[0]
             rate = (yes_count / total) * 100 if total > 0 else 0
             
-            # Display metrics
             col1, col2 = st.columns(2)
             col1.metric("Recommendation Rate", f"{rate:.1f}%")
             col2.metric("Total Responses", total)
             
-            # Daily responses
-            daily = df.groupby(df['created_at'].dt.date)['answer'].count()
+            daily = df.groupby('date').size()
             st.line_chart(daily.rename("Daily Responses"))
         else:
             st.warning("No responses in selected date range")
-    except ObjectDoesNotExist:
-        st.warning("No recommendation data available")
+    except Question.DoesNotExist:
+        st.error("Recommendation question not found")
+    except Exception as e:
+        st.warning(f"Error loading recommendation data: {str(e)}")
 
 def show_preferred_event_format():
-    
     """Preferred Event Formats"""
     st.subheader("Preferred Event Formats")
     
     try:
-        format_question = Response.objects.filter(
+        question = Question.objects.get(
+            text__icontains="What type of events do you prefer"
+        )
+        responses = Response.objects.filter(
+            question=question,
             created_at__date__gte=st.session_state.date_range[0],
-            created_at__date__lte=st.session_state.date_range[1],
-            question__text__icontains="What type of events do you prefer" )
+            created_at__date__lte=st.session_state.date_range[1]
+        )
         
-        if format_question:
-            format_data = Response.objects.filter(question=format_question) \
-                .values('answer') \
-                    .annotate(count=Count('id')) \
-                        .order_by('-count')
-               
-            if format_data.exists():
-                # Create columns dynamically based on number of responses
-                cols = st.columns(len(format_data))
-                for idx, fmt in enumerate(format_data):
-                    with cols[idx]:
-                        st.metric(label=fmt['answer'],value=fmt['count'])
-            else:
-                    st.info("No event preference data")
+        if responses.exists():
+            format_data = responses.values('answer') \
+                .annotate(count=Count('id')) \
+                .order_by('-count')
+            
+            cols = st.columns(len(format_data))
+            for idx, fmt in enumerate(format_data):
+                with cols[idx]:
+                    st.metric(label=fmt['answer'], value=fmt['count'])
         else:
-            st.error("Event format question not found")
-    except: #ObjectDoesNotExist:
-        st.warning("No preferred event format data available")
+            st.info("No event preference data in selected date range")
+    except Question.DoesNotExist:
+        st.error("Event format question not found")
+    except Exception as e:
+        st.warning(f"Error loading format data: {str(e)}")
 
 
 def show_private_insights(_private_data):
