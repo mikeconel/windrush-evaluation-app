@@ -206,7 +206,8 @@ def show_recommendation_metrics():
         st.warning("No recommendation data available")
 
 def show_preferred_event_format():
-      """Preferred Event Formats"""
+    
+    """Preferred Event Formats"""
     st.subheader("Preferred Event Formats")
     
     try:
