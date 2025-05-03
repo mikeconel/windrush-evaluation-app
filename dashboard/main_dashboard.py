@@ -213,7 +213,7 @@ def show_recommendation_metrics():
             col2.metric("Total Responses", total)
             
             daily = df.groupby('date').size()
-            st.line_chart(daily.rename("Daily Responses"),color='d4af37')
+            st.line_chart(daily.rename("Daily Responses"),color='#d4af37')
         else:
             st.warning("No responses in selected date range")
     except Question.DoesNotExist:
