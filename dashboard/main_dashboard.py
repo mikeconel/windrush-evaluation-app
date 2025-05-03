@@ -213,8 +213,8 @@ def show_private_insights(_private_data):
     """Admin analytics dashboard"""
     st.header("Administrator Dashboard")
     
-    # Show global date picker at the top
-    get_global_date_range()
+    # Persistent date picker at top
+    handle_dates()
     
     with st.expander("Community Engagement Metrics", expanded=True):
         col1, col2, col3 = st.columns([1, 1, 1])
