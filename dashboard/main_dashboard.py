@@ -182,7 +182,7 @@ def show_metric(data, title, date_column='created_at', value_column='count'):
         (df[date_column] >= start_date) & 
         (df[date_column] <= end_date)
     ]
-    st.write("Debug: Filtered Data:", filtered)  # Debugging
+    #st.write("Debug: Filtered Data:", filtered)  # Debugging
 
     if filtered.empty:
         st.warning(f"No {title} in selected date range")
