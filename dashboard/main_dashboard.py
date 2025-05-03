@@ -175,7 +175,7 @@ def show_recommendation_metrics():
     question = Question.objects.filter(
         text__icontains="recommend this event to a friend"
     ).first()
-    
+    date_range = (datetime.date(2025, 4, 4), datetime.date(2025, 4, 6)) #Just for Debugging
     if question and len(date_range) == 2:
         start_date, end_date = date_range
         responses = Response.objects.filter(
