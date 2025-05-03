@@ -170,23 +170,17 @@ def show_participant_metrics():
         st.warning("No participant data available")
 
 def show_recommendation_metrics():
-    """Reusable recommendation metric component"""
+    """Recommendation rate component"""
     st.subheader("Recommendation Metrics")
     
-    # Get global date range
-    date_range = get_global_date_range()
-    #st.write("My Date Range",date_range)
-    
-    question = Question.objects.filter(
-        text__icontains="recommend this event to a friend"
-    ).first()
-    if question and len(date_range) == 2:
-        start_date, end_date = date_range
+    try:
         responses = Response.objects.filter(
-            question=question,
-            created_at__date__gte=start_date,
-            created_at__date__lte=end_date
+            created_at__date__gte=st.session_state.date_range[0],
+            created_at__date__lte=st.session_state.date_range[1],
+            question__text__icontains="recommend"
         )
+        # ... rest of recommendation logic ...
+    
         
         if responses.exists():
             # Convert to DataFrame
@@ -208,6 +202,8 @@ def show_recommendation_metrics():
             st.line_chart(daily.rename("Daily Responses"))
         else:
             st.warning("No responses in selected date range")
+    except ObjectDoesNotExist:
+        st.warning("No recommendation data available")
 
 def show_private_insights(_private_data):
     """Admin analytics dashboard"""
