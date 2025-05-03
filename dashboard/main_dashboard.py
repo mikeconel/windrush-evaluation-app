@@ -228,7 +228,7 @@ def show_private_insights(_private_data):
             if question:
                 responses = Response.objects.filter(question=question).values('created_at', 'answer')
                 #st.write("Debug: Recommendation Responses", responses)  # Debugging
-               created_at = responses[0]
+                created_at = responses[0]
                 show_metric(
                     responses,
                     title="Recommendation Responses",
