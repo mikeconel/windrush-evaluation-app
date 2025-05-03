@@ -119,10 +119,10 @@ def show_public_components(data):
         else:
             st.info("No text feedback available yet")
 
-
+st.session_state.date_range = None
 def get_global_date_range():
     """Universal date range selector stored in session state"""
-    st.session_state.date_range = None
+    global st.session_state.date_range
     if 'date_range' not in st.session_state:
         # Get default dates from your database (example query)
         min_date = Participant.objects.earliest('created_at').created_at.date()
@@ -135,6 +135,7 @@ def get_global_date_range():
         )
         st.write("My SessionState Dates",st.session_state.date_range)
     return st.session_state.date_range
+st.session_state.date_range = None
 
 def show_participant_metrics():
     """Reusable participant metric component"""
