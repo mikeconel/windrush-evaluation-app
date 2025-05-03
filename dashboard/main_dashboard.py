@@ -205,35 +205,15 @@ def show_recommendation_metrics():
     except ObjectDoesNotExist:
         st.warning("No recommendation data available")
 
-def show_private_insights(_private_data):
-    """Admin analytics dashboard"""
-    st.header("Administrator Dashboard")
+def show_preferred_event_format():
+      """Preferred Event Formats"""
+    st.subheader("Preferred Event Formats")
     
-    # Persistent date picker at top
-    handle_dates()
-    
-    with st.expander("Community Engagement Metrics", expanded=True):
-        col1, col2, col3 = st.columns([1, 1, 1])
-        
-        with col1:
-            show_participant_metrics()
-        
-        with col2:
-            show_recommendation_metrics()
-
-        # Add force refresh button
-    if st.button("Refresh All Data"):
-        st.session_state.clear()
-        st.rerun()
-        
-        # Event Preferences
-        #
-        # with col3:
-
-            # In the Community Engagement Metrics expander
-        with col3:
-            st.write("Preferred Event Formats")
-            format_question = Question.objects.filter(text__icontains="What type of events do you prefer").first()
+    try:
+        format_question = Response.objects.filter(
+            created_at__date__gte=st.session_state.date_range[0],
+            created_at__date__lte=st.session_state.date_range[1],
+            question__text__icontains="What type of events do you prefer" )
     
             if format_question:
                 format_data = Response.objects.filter(question=format_question) \
@@ -251,6 +231,34 @@ def show_private_insights(_private_data):
                     st.info("No event preference data")
             else:
                 st.error("Event format question not found")
+    except ObjectDoesNotExist:
+        st.warning("No preferred event format data available")
+
+
+def show_private_insights(_private_data):
+    """Admin analytics dashboard"""
+    st.header("Administrator Dashboard")
+    
+    # Persistent date picker at top
+    handle_dates()
+    
+    with st.expander("Community Engagement Metrics", expanded=True):
+        col1, col2, col3 = st.columns([1, 1, 1])
+        
+        with col1:
+            show_participant_metrics()
+        
+        with col2:
+            show_recommendation_metrics()
+
+            # In the Community Engagement Metrics expander
+        with col3:
+            show_preferred_event_format()
+          
+    # Add force refresh button
+    if st.button("Refresh All Data"):
+        st.session_state.clear()
+        st.rerun()
 
     # Demographic Analysis
     with st.expander("Demographic Insights", expanded=True):
