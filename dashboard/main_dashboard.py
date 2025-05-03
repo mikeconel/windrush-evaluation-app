@@ -211,7 +211,7 @@ def show_private_insights(_private_data):
             participants = Participant.objects.all().values('created_at')
             #st.write("Debug: Participants Data", participants)  # Debugging
             if participants:
-                created_at = participants['created_at']
+                created_at = participants[0]
                 show_metric(
                     participants, 
                     title="Participants",
