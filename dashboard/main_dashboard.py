@@ -216,7 +216,7 @@ def show_private_insights(_private_data):
             show_participant_metrics()
         
         with col2:
-            show_recommendation_metrics())
+            show_recommendation_metrics()
 
         # Event Preferences
         #
