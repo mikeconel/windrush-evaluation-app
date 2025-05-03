@@ -211,11 +211,10 @@ def show_private_insights(_private_data):
             participants = Participant.objects.all().values('created_at')
             #st.write("Debug: Participants Data", participants)  # Debugging
             if participants:
-                created_at = participants[0]
                 show_metric(
                     participants, 
                     title="Participants",
-                    date_column=created_at,
+                    date_column='created_at',
                     value_column='count'
                 )
 
@@ -228,11 +227,10 @@ def show_private_insights(_private_data):
             if question:
                 responses = Response.objects.filter(question=question).values('created_at', 'answer')
                 #st.write("Debug: Recommendation Responses", responses)  # Debugging
-                created_at = responses[0]
                 show_metric(
                     responses,
                     title="Recommendation Responses",
-                    date_column=created_at,
+                    date_column='created_at',
                     value_column='answer'
                 )
 
