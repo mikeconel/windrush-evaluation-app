@@ -215,23 +215,23 @@ def show_preferred_event_format():
             created_at__date__gte=st.session_state.date_range[0],
             created_at__date__lte=st.session_state.date_range[1],
             question__text__icontains="What type of events do you prefer" )
-    
-            if format_question:
-                format_data = Response.objects.filter(question=format_question) \
-                    .values('answer') \
-                        .annotate(count=Count('id')) \
-                            .order_by('-count')
+        
+        if format_question:
+            format_data = Response.objects.filter(question=format_question) \
+                .values('answer') \
+                    .annotate(count=Count('id')) \
+                        .order_by('-count')
                
-                if format_data.exists():
+            if format_data.exists():
                 # Create columns dynamically based on number of responses
-                    cols = st.columns(len(format_data))
-                    for idx, fmt in enumerate(format_data):
-                        with cols[idx]:
-                            st.metric(label=fmt['answer'],value=fmt['count'])
-                else:
-                    st.info("No event preference data")
+                cols = st.columns(len(format_data))
+                for idx, fmt in enumerate(format_data):
+                    with cols[idx]:
+                        st.metric(label=fmt['answer'],value=fmt['count'])
             else:
-                st.error("Event format question not found")
+                    st.info("No event preference data")
+        else:
+            st.error("Event format question not found")
     except ObjectDoesNotExist:
         st.warning("No preferred event format data available")
 
