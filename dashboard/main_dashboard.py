@@ -232,7 +232,7 @@ def show_preferred_event_format():
                     st.info("No event preference data")
         else:
             st.error("Event format question not found")
-    except ObjectDoesNotExist:
+    except: #ObjectDoesNotExist:
         st.warning("No preferred event format data available")
 
 
