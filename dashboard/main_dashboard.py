@@ -204,7 +204,7 @@ def show_private_insights(_private_data):
     st.header("Administrator Dashboard")
 
     with st.expander("Community Engagement Metrics", expanded=True):
-        col1, col2 = st.columns([1, 2])
+        col1, col2, col3 = st.columns([1, 1, 1])
 
         # Participants Metric
         with col1:
