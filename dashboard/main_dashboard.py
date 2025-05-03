@@ -120,133 +120,103 @@ def show_public_components(data):
             st.info("No text feedback available yet")
 
 
-def get_date_range(data, date_column='created_at'):
-    """Universal date range selector component"""
-    participant_list = list(data)  # Explicitly convert QuerySet to a list
-    df = pd.DataFrame.from_records(participant_list)  # Ensure correct conversion
+def get_global_date_range():
+    """Universal date range selector stored in session state"""
+    if 'date_range' not in st.session_state:
+        # Get default dates from your database (example query)
+        min_date = Participant.objects.earliest('created_at').created_at.date()
+        max_date = Participant.objects.latest('created_at').created_at.date()
+        
+        st.session_state.date_range = st.date_input(
+            "Select Date Range for All Metrics",
+            value=[min_date, max_date],
+            key="global_date_picker"
+        )
+    return st.session_state.date_range
 
-    #st.write("Debug: Raw DataFrame", df)  # Debugging
+def show_participant_metrics():
+    """Reusable participant metric component"""
+    st.subheader("Participant Metrics")
     
-    if df.empty:
-        st.warning("No data found.")
-        return None, None
-
-    if date_column not in df.columns:
-        st.error(f"Column '{date_column}' not found in DataFrame. Available columns: {df.columns}")
-        return None, None
-
-    try:
-        df.dropna(subset=[date_column], inplace=True)  # Drop missing values
-        df[date_column] = pd.to_datetime(df[date_column], errors='coerce')
-        st.write("Debug: Converted Date Column", df[date_column])  # Debugging
-
-        min_date = df[date_column].dropna().min().date()
-        max_date = df[date_column].dropna().max().date()
-        st.write("Debug: Min/Max Dates:", min_date, max_date)
-    except Exception as e:
-        st.error(f"Error in date processing: {e}")
-        return None, None
-
-    date_range = st.date_input(
-        "Select Date Range",
-        value=[min_date, max_date] if min_date and max_date else [datetime.today().date(), datetime.today().date()],
-        min_value=min_date,
-        max_value=max_date
-    )
-
+    # Get global date range
+    date_range = get_global_date_range()
+    
     if len(date_range) == 2:
-        return pd.to_datetime(date_range[0]), pd.to_datetime(date_range[1])
-    return None, None
+        start_date, end_date = date_range
+        participants = Participant.objects.filter(
+            created_at__date__gte=start_date,
+            created_at__date__lte=end_date
+        )
+        
+        # Convert to DataFrame
+        df = pd.DataFrame(list(participants.values('created_at')))
+        if not df.empty:
+            df['created_at'] = pd.to_datetime(df['created_at'])
+            
+            # Daily counts
+            daily = df.groupby(df['created_at'].dt.date).size()
+            
+            # Display metrics
+            st.metric("Total Participants", len(participants))
+            st.line_chart(daily.rename("Daily Participants"))
+        else:
+            st.warning("No participants in selected date range")
 
-def show_metric(data, title, date_column='created_at', value_column='count'):
-    """Reusable metric component with date filtering"""
-    df = pd.DataFrame.from_records(list(data))  # Ensure correct conversion
-    #st.write("Debug: Displaying Data in show_metric", df)  # Debugging
-
-    # Check for required columns
-    if df.empty or date_column not in df.columns:
-        st.warning(f"No {title} data available")
-        return
-
-    # Ensure value_column exists
-    if value_column not in df.columns:
-        df = df.groupby(date_column).size().reset_index(name=value_column)
-
-    start_date, end_date = get_date_range(df, date_column)
-    st.write("Debug: Selected Dates:", start_date, end_date)  # Debugging
-    if not start_date or not end_date:
-        return
-
-    # Filter data
-    filtered = df[
-        (df[date_column] >= start_date) & 
-        (df[date_column] <= end_date)
-    ]
-    #st.write("Debug: Filtered Data:", filtered)  # Debugging
-
-    if filtered.empty:
-        st.warning(f"No {title} in selected date range")
-        return
-
-    # Display metrics
-    total = filtered[value_column].sum()
-    st.metric(f"Total {title}", total)
-
-    # Show chart toggle
-    if st.button(f"Show {title} timeline", key=f"{title}_chart"):
-        daily_counts = filtered.groupby(filtered[date_column].dt.date)[value_column].sum().reset_index()
-        st.line_chart(daily_counts.set_index(date_column))
-
-    return total  # Fixed return statement
+def show_recommendation_metrics():
+    """Reusable recommendation metric component"""
+    st.subheader("Recommendation Metrics")
+    
+    # Get global date range
+    date_range = get_global_date_range()
+    
+    question = Question.objects.filter(
+        text__icontains="recommend this event to a friend"
+    ).first()
+    
+    if question and len(date_range) == 2:
+        start_date, end_date = date_range
+        responses = Response.objects.filter(
+            question=question,
+            created_at__date__gte=start_date,
+            created_at__date__lte=end_date
+        )
+        
+        if responses.exists():
+            # Convert to DataFrame
+            df = pd.DataFrame(list(responses.values('answer', 'created_at')))
+            df['created_at'] = pd.to_datetime(df['created_at'])
+            
+            # Calculate rates
+            yes_count = df[df['answer'].str.contains("Yes", case=False)].shape[0]
+            total = df.shape[0]
+            rate = (yes_count / total) * 100 if total > 0 else 0
+            
+            # Display metrics
+            col1, col2 = st.columns(2)
+            col1.metric("Recommendation Rate", f"{rate:.1f}%")
+            col2.metric("Total Responses", total)
+            
+            # Daily responses
+            daily = df.groupby(df['created_at'].dt.date)['answer'].count()
+            st.line_chart(daily.rename("Daily Responses"))
+        else:
+            st.warning("No responses in selected date range")
 
 def show_private_insights(_private_data):
     """Admin analytics dashboard"""
     st.header("Administrator Dashboard")
-
+    
+    # Show global date picker at the top
+    get_global_date_range()
+    
     with st.expander("Community Engagement Metrics", expanded=True):
         col1, col2, col3 = st.columns([1, 1, 1])
-
-        # Participants Metric
+        
         with col1:
-            participants = Participant.objects.all().values('created_at')
-            #st.write("Debug: Participants Data", participants)  # Debugging
-            if participants:
-                show_metric(
-                    participants, 
-                    title="Participants",
-                    date_column='created_at',
-                    value_column='count'
-                )
-
-        # Recommendation Rate Metric
+            show_participant_metrics()
+        
         with col2:
-            question = Question.objects.filter(
-                text__icontains="recommend this event to a friend"
-            ).first()
-
-            if question:
-                responses = Response.objects.filter(question=question).values('created_at', 'answer')
-                #st.write("Debug: Recommendation Responses", responses)  # Debugging
-                show_metric(
-                    responses,
-                    title="Recommendation Responses",
-                    date_column='created_at',
-                    value_column='answer'
-                )
-
-                # Calculate recommendation rate
-                response_df = pd.DataFrame.from_records(list(responses))  # Ensure correct conversion
-                if not response_df.empty:
-                    yes_responses = response_df[response_df['answer'].str.contains("Yes", case=False)]
-                    rec_rate = (len(yes_responses) / len(response_df)) * 100 if len(response_df) > 0 else 0
-
-                    col_a, col_b = st.columns(2)
-                    col_a.metric("Would Recommend", f"{rec_rate:.1f}%")
-                    col_b.metric("Would Not Recommend", f"{100-rec_rate:.1f}%")
-                else:
-                    st.warning("No recommendation responses")
-            else:
-                st.error("Recommendation question not found")
+            show_recommendation_metrics())
 
         # Event Preferences
         #
