@@ -125,7 +125,7 @@ def get_date_range(data, date_column='created_at'):
     participant_list = list(data)  # Explicitly convert QuerySet to a list
     df = pd.DataFrame.from_records(participant_list)  # Ensure correct conversion
 
-    st.write("Debug: Raw DataFrame", df)  # Debugging
+    #st.write("Debug: Raw DataFrame", df)  # Debugging
     
     if df.empty:
         st.warning("No data found.")
@@ -161,7 +161,7 @@ def get_date_range(data, date_column='created_at'):
 def show_metric(data, title, date_column='created_at', value_column='count'):
     """Reusable metric component with date filtering"""
     df = pd.DataFrame.from_records(list(data))  # Ensure correct conversion
-    st.write("Debug: Displaying Data in show_metric", df)  # Debugging
+    #st.write("Debug: Displaying Data in show_metric", df)  # Debugging
 
     # Check for required columns
     if df.empty or date_column not in df.columns:
