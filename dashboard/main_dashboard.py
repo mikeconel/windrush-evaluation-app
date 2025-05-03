@@ -15,6 +15,8 @@ from PIL import Image
 from datetime import datetime
 #import nltk
 #nltk.download('punkt')
+from django.db.models import Count
+from django.db.models.functions import TruncDate
 
 # Load images
 
@@ -120,49 +122,52 @@ def show_public_components(data):
             st.info("No text feedback available yet")
 
 
-def get_global_date_range():
-    """Universal date range selector stored in session state"""
+def handle_dates():
+    """Central date range handler with persistent state"""
+    # Initialize with default dates if not exists
     if 'date_range' not in st.session_state:
-        # Get default dates from your database (example query)
         min_date = Participant.objects.earliest('created_at').created_at.date()
         max_date = Participant.objects.latest('created_at').created_at.date()
-        
-        st.session_state.date_range = st.date_input(
-            "Select Date Range for All Metrics",
-            value=[min_date, max_date],
-            key="global_date_picker"
-        )
-        st.write("My SessionState Dates",st.session_state.date_range)
-    return st.session_state.date_range
+        st.session_state.date_range = [min_date, max_date]
+
+    # Always show date picker and update session state
+    new_dates = st.date_input(
+        "Select Date Range",
+        value=st.session_state.date_range,
+        min_value=st.session_state.date_range[0],
+        max_value=st.session_state.date_range[1],
+        key="global_date_picker"
+    )
     
+    # Update session state only if valid new range
+    if len(new_dates) == 2:
+        st.session_state.date_range = new_dates
+
 def show_participant_metrics():
-    """Reusable participant metric component"""
+    """Participant metrics component"""
     st.subheader("Participant Metrics")
     
-    # Get global date range
-    date_range = get_global_date_range()
-    st.write("My Date Range",date_range)
-    
-    if len(date_range) == 2:
-        start_date, end_date = date_range
+    try:
         participants = Participant.objects.filter(
-            created_at__date__gte=start_date,
-            created_at__date__lte=end_date
+            created_at__date__gte=st.session_state.date_range[0],
+            created_at__date__lte=st.session_state.date_range[1]
         )
+        count = participants.count()
         
-        # Convert to DataFrame
-        df = pd.DataFrame(list(participants.values('created_at')))
+        st.metric("Total Participants", count,
+                 help="Includes all participants in selected date range")
+        
+        # Show timeline
+        df = pd.DataFrame(
+            participants.values('created_at')
+            .annotate(date=TruncDate('created_at'))
+            .values('date')
+            .annotate(count=Count('id'))
+        )
         if not df.empty:
-            df['created_at'] = pd.to_datetime(df['created_at'])
-            
-            # Daily counts
-            daily = df.groupby(df['created_at'].dt.date).size()
-            
-            # Display metrics
-            st.metric("Total Participants", len(participants))
-            st.line_chart(daily.rename("Daily Participants"))
-        else:
-            st.warning("No participants in selected date range")
+            st.line_chart(df.set_index('date'))
+    except ObjectDoesNotExist:
+        st.warning("No participant data available")
 
 def show_recommendation_metrics():
     """Reusable recommendation metric component"""
@@ -220,6 +225,11 @@ def show_private_insights(_private_data):
         with col2:
             show_recommendation_metrics()
 
+        # Add force refresh button
+    if st.button("Refresh All Data"):
+        st.session_state.clear()
+        st.rerun()
+        
         # Event Preferences
         #
         # with col3:
