@@ -122,7 +122,7 @@ def show_public_components(data):
 st.session_state.date_range = None
 def get_global_date_range():
     """Universal date range selector stored in session state"""
-    global st.session_state.date_range
+    st.session_state.date_range global
     if 'date_range' not in st.session_state:
         # Get default dates from your database (example query)
         min_date = Participant.objects.earliest('created_at').created_at.date()
