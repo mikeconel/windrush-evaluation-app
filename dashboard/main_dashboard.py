@@ -247,6 +247,8 @@ def show_preferred_event_format():
                     colours = ["blue", "gold", "black"]
                     label = [fmt['answer']]
                     value = [fmt['count']]
+                    st.write("debugging label:",label)
+                    st.write("debugging value:",value)
                     plt.bar(label, value, color=colours[:len(label)])
             plt.show()
         else:
