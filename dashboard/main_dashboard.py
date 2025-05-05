@@ -249,9 +249,13 @@ def show_preferred_event_format():
                     value = [fmt['count']]
                     st.write("debugging label:",label)
                     st.write("debugging value:",value)
-                    
-                    plt.bar(label[0], value[0], color=colours[0])
-            plt.show()
+                    plt.figure(figsize=(6, 4))
+                    plt.bar(labels, values, color=colours[:len(labels)])  
+                    plt.xlabel("Event Type")
+                    plt.ylabel("Count")
+                    plt.title("Preferred Event Formats")
+                    plt.xticks(rotation=45)  # Improves readability for longer labels
+                    st.pyplot(plt)  # Proper Streamlit display
         else:
             st.info("No event preference data in selected date range")
     except Question.DoesNotExist:
