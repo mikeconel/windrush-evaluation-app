@@ -244,6 +244,9 @@ def show_preferred_event_format():
             for idx, fmt in enumerate(format_data):
                 with cols[idx]:
                     st.metric(label=fmt['answer'], value=fmt['count'])
+                    colours=["blue","gold","black"]
+                    plt.bar(label=fmt['answer'], value=fmt['count'],color=colours)
+                    plt.show()
         else:
             st.info("No event preference data in selected date range")
     except Question.DoesNotExist:
