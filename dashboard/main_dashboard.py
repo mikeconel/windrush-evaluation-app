@@ -248,7 +248,7 @@ def show_preferred_event_format():
                     label = [fmt['answer']]
                     value = [fmt['count']]
                     plt.bar(label, value, color=colours[:len(label)])
-                    plt.show()
+            plt.show()
         else:
             st.info("No event preference data in selected date range")
     except Question.DoesNotExist:
