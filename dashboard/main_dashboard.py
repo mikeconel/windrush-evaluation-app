@@ -252,7 +252,7 @@ def show_preferred_event_format():
             plt.bar(labels, values, color=colours[:len(labels)])  
             plt.xlabel("Event Type")
             plt.ylabel("Count")
-            plt.title("Preferred Event Formats")
+            #plt.title("Preferred Event Formats")
             plt.xticks(rotation=45)  # Improves readability for longer labels
             st.pyplot(plt)  # Proper Streamlit display
                     #st.bar_chart(label=fmt['answer'], value=fmt['count'],color=colours)
