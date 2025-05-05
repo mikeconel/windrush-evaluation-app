@@ -250,7 +250,7 @@ def show_preferred_event_format():
                     st.write("debugging label:",label)
                     st.write("debugging value:",value)
                     
-                    plt.bar(label[0][0], value[0][0], color=colours[:len(label)])
+                    plt.bar(label[0][0], value[0][0])
             plt.show()
         else:
             st.info("No event preference data in selected date range")
