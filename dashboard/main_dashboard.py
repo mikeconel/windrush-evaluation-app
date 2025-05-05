@@ -247,7 +247,7 @@ def show_preferred_event_format():
                     
             labels = [fmt['answer'] for fmt in format_data]
             values = [fmt['count'] for fmt in format_data]     
-            colours = ["blue", "gold", "black"]
+            colours = ['#1E3A8A', '#C4A747', '#94A3B8']
             plt.figure(figsize=(6, 4))
             plt.bar(labels, values, color=colours[:len(labels)])  
             plt.xlabel("Event Type")
