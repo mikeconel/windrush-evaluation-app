@@ -244,18 +244,22 @@ def show_preferred_event_format():
             for idx, fmt in enumerate(format_data):
                 with cols[idx]:
                     st.metric(label=fmt['answer'], value=fmt['count'])
-                    colours = ["blue", "gold", "black"]
-                    label = [fmt['answer']]
-                    value = [fmt['count']]
-                    st.write("debugging label:",label)
-                    st.write("debugging value:",value)
-                    plt.figure(figsize=(6, 4))
-                    plt.bar(labels, values, color=colours[:len(labels)])  
-                    plt.xlabel("Event Type")
-                    plt.ylabel("Count")
-                    plt.title("Preferred Event Formats")
-                    plt.xticks(rotation=45)  # Improves readability for longer labels
-                    st.pyplot(plt)  # Proper Streamlit display
+                    
+            labels = [fmt['answer'] for fmt in format_data]
+            values = [fmt['count'] for fmt in format_data]     
+            colours = ["blue", "gold", "black"]
+            labels = [fmt['answer']]
+            values = [fmt['count']]
+            st.write("debugging label:",labels)
+            st.write("debugging value:",values)
+            plt.figure(figsize=(6, 4))
+            plt.bar(labels, values, color=colours[:len(labels)])  
+            plt.xlabel("Event Type")
+            plt.ylabel("Count")
+            plt.title("Preferred Event Formats")
+            plt.xticks(rotation=45)  # Improves readability for longer labels
+            st.pyplot(plt)  # Proper Streamlit display
+                    #st.bar_chart(label=fmt['answer'], value=fmt['count'],color=colours)
         else:
             st.info("No event preference data in selected date range")
     except Question.DoesNotExist:
