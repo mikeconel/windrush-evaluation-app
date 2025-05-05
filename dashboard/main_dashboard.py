@@ -248,8 +248,8 @@ def show_preferred_event_format():
             labels = [fmt['answer'] for fmt in format_data]
             values = [fmt['count'] for fmt in format_data]     
             colours = ["blue", "gold", "black"]
-            labels = [fmt['answer']]
-            values = [fmt['count']]
+            #labels = [fmt['answer']]
+            #values = [fmt['count']]
             st.write("debugging label:",labels)
             st.write("debugging value:",values)
             plt.figure(figsize=(6, 4))
