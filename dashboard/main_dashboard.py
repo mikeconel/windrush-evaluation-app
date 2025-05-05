@@ -245,7 +245,7 @@ def show_preferred_event_format():
                 with cols[idx]:
                     st.metric(label=fmt['answer'], value=fmt['count'])
                     colours=["blue","gold","black"]
-                    plt.bar(label=fmt['answer'], value=fmt['count'],color=colours)
+                    plt.bar(fmt['answer'], fmt['count'],color=colours)
                     plt.show()
         else:
             st.info("No event preference data in selected date range")
