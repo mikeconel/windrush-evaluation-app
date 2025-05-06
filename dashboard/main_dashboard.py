@@ -288,8 +288,14 @@ def show_age_data():
                              category_orders={"age": [c[0] for c in Participant.AGE_RANGES]})
                 st.plotly_chart(fig, use_container_width=True)
 
-                # Corrected line chart implementation
-                st.line_chart(df.set_index("age")["count"], color='#d4af37')
+                colours = ["brown", "red", "black", "green", "gold", "blue", "gray", "yellow", "white"]
+
+                # Ensure df is correctly formatted
+                fig = px.pie(df, names="age", values="count", 
+                title="Age Group Distribution",
+                color_discrete_sequence=colours[:len(df)])  # Correct color slicing
+
+                st.plotly_chart(fig, use_container_width=True)
         else:
             st.warning("No responses in selected date range")
 
