@@ -319,7 +319,7 @@ def show_age_data():
                 df['age_midpoint'] = df['age'].apply(calculate_midpoint)
 
                 # Debugging output
-                st.write("Debugging Age Midpoints:", df[['age', 'age_midpoint']])
+                #st.write("Debugging Age Midpoints:", df[['age', 'age_midpoint']])
 
                 # Drop NaN values before calculating statistics
                 df_clean = df.dropna(subset=['age_midpoint'])
