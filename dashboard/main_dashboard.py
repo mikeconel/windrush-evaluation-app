@@ -310,10 +310,10 @@ def show_age_data():
                 avg_age = df['age'].mean()
                 max_age = df['age'].max()
                 min_age = df['age'].min()
-
+                st.write("debugging",avg_age)
                 # Nested horizontal layout for age metrics
                 age_col1, age_col2, age_col3 = st.columns(3)
-                age_col1.metric("Min. Age", f"{min_age:.1f} Yrs" if isinstance(min_age, (int, float)) else min_age or "N/A")
+                age_col1.metric("Min. Age", f"{min_age:.1f} Yrs" if pd.notna(min_age) else "N/A")
                 age_col2.metric("Avg. Age", f"{avg_age:.1f} Yrs" if pd.notna(avg_age) else "N/A")
                 age_col3.metric("Max. Age", f"{max_age:.1f} Yrs" if pd.notna(max_age) else "N/A")
         
