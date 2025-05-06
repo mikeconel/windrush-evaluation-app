@@ -295,6 +295,12 @@ def show_age_data():
                 title="AGD Pie Chart",
                 color_discrete_sequence=colours[:len(df)])  # Correct color slicing
 
+                # Reduce the size of the pie chart
+                fig.update_layout(
+                width=400,  # Adjust width
+                height=400  # Adjust height
+                )
+
                 st.plotly_chart(fig, use_container_width=False)
         else:
             st.warning("No responses in selected date range")
