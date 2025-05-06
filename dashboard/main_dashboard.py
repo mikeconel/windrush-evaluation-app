@@ -278,8 +278,8 @@ def show_age_data():
         if count > 0:  # Use count instead of `.exists()`
             df = pd.DataFrame(
                 participants.annotate(date=TruncDate('created_at'))
-                .values('date', 'age')
-                .annotate(count=Count('id'))
+                .annotate(count=Count('id'))  # Ensure count is included
+                .values('date', 'age', 'count')
             )
 
             if not df.empty:  # Corrected check for DataFrame existence
@@ -292,16 +292,31 @@ def show_age_data():
 
                 # Ensure df is correctly formatted
                 fig = px.pie(df, names="age", values="count", 
-                title="AGD Pie Chart",
-                color_discrete_sequence=colours[:len(df)])  # Correct color slicing
-
+                             title="AGD Pie Chart",
+                             color_discrete_sequence=colours[:len(df)])  # Correct color slicing
+                
                 # Reduce the size of the pie chart
                 fig.update_layout(
-                width=400,  # Adjust width
-                height=400  # Adjust height
+                    width=400,  # Adjust width
+                    height=400  # Adjust height
                 )
+                st.plotly_chart(fig, use_container_width=True)
 
-                st.plotly_chart(fig, use_container_width=False)
+                st.subheader("Age Overview")
+                
+                # Convert age to numeric to ensure correct calculations
+                df['age'] = pd.to_numeric(df['age'], errors='coerce')
+
+                avg_age = df['age'].mean()
+                max_age = df['age'].max()
+                min_age = df['age'].min()
+
+                # Nested horizontal layout for age metrics
+                age_col1, age_col2, age_col3 = st.columns(3)
+                age_col1.metric("Min. Age", f"{min_age:.1f} Yrs" if pd.notna(min_age) else "N/A")
+                age_col2.metric("Avg. Age", f"{avg_age:.1f} Yrs" if pd.notna(avg_age) else "N/A")
+                age_col3.metric("Max. Age", f"{max_age:.1f} Yrs" if pd.notna(max_age) else "N/A")
+        
         else:
             st.warning("No responses in selected date range")
 
@@ -309,6 +324,7 @@ def show_age_data():
         st.error("Participants not found")
     except Exception as e:
         st.warning(f"Error loading age data: {str(e)}")
+
 
 
 
@@ -344,34 +360,34 @@ def show_private_insights(_private_data):
         # Age Distribution
         with col1:
             show_age_data()
-            '''age_data = Participant.objects.values('age').annotate(count=Count('id'))
-            if age_data.exists():
-                fig = px.bar(age_data, x='age', y='count', 
-                           title="Age Group Distribution",
-                           category_orders={"age": [c[0] for c in Participant.AGE_RANGES]})
-                st.plotly_chart(fig, use_container_width=True)'''
+           #             '''age_data = Participant.objects.values('age').annotate(count=Count('id'))
+#             if age_data.exists():
+#                 fig = px.bar(age_data, x='age', y='count', 
+#                            title="Age Group Distribution",
+#                            category_orders={"age": [c[0] for c in Participant.AGE_RANGES]})
+#                 st.plotly_chart(fig, use_container_width=True)'''
 
-                # # === Left Column: Age Metrics ===
-#         #with col1:
-            st.subheader("Age Overview")
-            avg_age_data = Participant.objects.aggregate(avg_age=Avg('age'))
-            avg_age = avg_age_data['avg_age']
+#                 # # === Left Column: Age Metrics ===
+# #         #with col1:
+#             st.subheader("Age Overview")
+#             avg_age_data = Participant.objects.aggregate(avg_age=Avg('age'))
+#             avg_age = avg_age_data['avg_age']
             
-            age_extremes = Participant.objects.aggregate(max_age=Max('age'),min_age=Min('age'))
-            max_age = age_extremes['max_age']
-            min_age = age_extremes['min_age']
+#             age_extremes = Participant.objects.aggregate(max_age=Max('age'),min_age=Min('age'))
+#             max_age = age_extremes['max_age']
+#             min_age = age_extremes['min_age']
             
-            #Will use trhe below when I move over to postgre SQL
-            # age_stats = Participant.objects.aggregate(std_dev=StdDev('age'))
-            # std_dev = age_stats['std_dev']
-            # st.write(std_dev)
+#             #Will use trhe below when I move over to postgre SQL
+#             # age_stats = Participant.objects.aggregate(std_dev=StdDev('age'))
+#             # std_dev = age_stats['std_dev']
+#             # st.write(std_dev)
             
 
-            # Nested horizontal layout for age metrics
-            age_col1, age_col2, age_col3 = st.columns(3)
-            age_col1.metric("Min. Age", f"{min_age:.1f} Yrs" if isinstance(min_age, (int, float)) else min_age or "N/A")
-            age_col2.metric("Avg. Age", f"{avg_age:.1f}" if isinstance(avg_age, (int, float)) else avg_age or "N/A")
-            age_col3.metric("Max. Age", f"{max_age:.1f} Yrs" if isinstance(max_age, (int, float)) else max_age or "N/A")
+#             # Nested horizontal layout for age metrics
+#             age_col1, age_col2, age_col3 = st.columns(3)
+#             age_col1.metric("Min. Age", f"{min_age:.1f} Yrs" if isinstance(min_age, (int, float)) else min_age or "N/A")
+#             age_col2.metric("Avg. Age", f"{avg_age:.1f}" if isinstance(avg_age, (int, float)) else avg_age or "N/A")
+#             age_col3.metric("Max. Age", f"{max_age:.1f} Yrs" if isinstance(max_age, (int, float)) else max_age or "N/A")
         
         # Gender-Ethnicity Sunburst
         with col2:
