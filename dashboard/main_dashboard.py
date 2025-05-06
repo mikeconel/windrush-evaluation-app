@@ -379,11 +379,6 @@ def show_private_insights(_private_data):
         # Age Distribution
         with col1:
             show_age_data()
-
-    # Add force refresh button
-    if st.button("Refresh All Data"):
-        st.session_state.clear()
-        st.rerun()
         
         # Gender-Ethnicity Sunburst
         with col2:
@@ -426,6 +421,11 @@ def show_private_insights(_private_data):
                 col3.metric("Not Specified", counts.get('Not Specified', 0))
             else:
                 st.info("No gender data available")
+
+    # Add force refresh button
+    if st.button("Refresh All Data"):
+        st.session_state.clear()
+        st.rerun()
 
     # Geographic Analysis
     with st.expander("Visitor Origins Analysis", expanded=True):
