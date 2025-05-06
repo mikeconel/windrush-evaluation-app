@@ -371,10 +371,6 @@ def show_private_insights(_private_data):
         with col3:
             show_preferred_event_format()
           
-    # Add force refresh button
-    if st.button("Refresh All Data"):
-        st.session_state.clear()
-        st.rerun()
 
     # Demographic Analysis
     with st.expander("Demographic Insights", expanded=True):
@@ -383,6 +379,11 @@ def show_private_insights(_private_data):
         # Age Distribution
         with col1:
             show_age_data()
+
+    # Add force refresh button
+    if st.button("Refresh All Data"):
+        st.session_state.clear()
+        st.rerun()
         
         # Gender-Ethnicity Sunburst
         with col2:
