@@ -311,7 +311,7 @@ def show_age_data():
                     width=400,  
                     height=400  
                 )
-                st.plotly_chart(fig, use_container_width=True)
+                #st.plotly_chart(fig, use_container_width=True)
 
                 st.subheader("Age Overview")
                 
@@ -383,34 +383,6 @@ def show_private_insights(_private_data):
         # Age Distribution
         with col1:
             show_age_data()
-           #             '''age_data = Participant.objects.values('age').annotate(count=Count('id'))
-#             if age_data.exists():
-#                 fig = px.bar(age_data, x='age', y='count', 
-#                            title="Age Group Distribution",
-#                            category_orders={"age": [c[0] for c in Participant.AGE_RANGES]})
-#                 st.plotly_chart(fig, use_container_width=True)'''
-
-#                 # # === Left Column: Age Metrics ===
-# #         #with col1:
-#             st.subheader("Age Overview")
-#             avg_age_data = Participant.objects.aggregate(avg_age=Avg('age'))
-#             avg_age = avg_age_data['avg_age']
-            
-#             age_extremes = Participant.objects.aggregate(max_age=Max('age'),min_age=Min('age'))
-#             max_age = age_extremes['max_age']
-#             min_age = age_extremes['min_age']
-            
-#             #Will use trhe below when I move over to postgre SQL
-#             # age_stats = Participant.objects.aggregate(std_dev=StdDev('age'))
-#             # std_dev = age_stats['std_dev']
-#             # st.write(std_dev)
-            
-
-#             # Nested horizontal layout for age metrics
-#             age_col1, age_col2, age_col3 = st.columns(3)
-#             age_col1.metric("Min. Age", f"{min_age:.1f} Yrs" if isinstance(min_age, (int, float)) else min_age or "N/A")
-#             age_col2.metric("Avg. Age", f"{avg_age:.1f}" if isinstance(avg_age, (int, float)) else avg_age or "N/A")
-#             age_col3.metric("Max. Age", f"{max_age:.1f} Yrs" if isinstance(max_age, (int, float)) else max_age or "N/A")
         
         # Gender-Ethnicity Sunburst
         with col2:
