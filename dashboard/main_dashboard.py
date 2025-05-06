@@ -307,15 +307,23 @@ def show_age_data():
                 # Convert age to numeric to ensure correct calculations
                 df['age'] = pd.to_numeric(df['age'], errors='coerce')
 
-                avg_age = df['age'].mean()
-                max_age = df['age'].max()
-                min_age = df['age'].min()
-                st.write("debugging",avg_age)
+                # Debugging output
+                st.write("Debugging Age Data:", df['age'])
+                # Drop NaN values before calculating statistics
+                df_clean = df.dropna(subset=['age'])
+
+                if not df_clean.empty:
+                    avg_age = df_clean['age'].mean()
+                    max_age = df_clean['age'].max()
+                    min_age = df_clean['age'].min()
+                else:
+                    avg_age, max_age, min_age = None, None, None
+
                 # Nested horizontal layout for age metrics
                 age_col1, age_col2, age_col3 = st.columns(3)
-                age_col1.metric("Min. Age", f"{min_age:.1f} Yrs" if pd.notna(min_age) else "N/A")
-                age_col2.metric("Avg. Age", f"{avg_age:.1f} Yrs" if pd.notna(avg_age) else "N/A")
-                age_col3.metric("Max. Age", f"{max_age:.1f} Yrs" if pd.notna(max_age) else "N/A")
+                age_col1.metric("Min. Age", f"{min_age:.1f} Yrs" if min_age is not None else "N/A")
+                age_col2.metric("Avg. Age", f"{avg_age:.1f} Yrs" if avg_age is not None else "N/A")
+                age_col3.metric("Max. Age", f"{max_age:.1f} Yrs" if max_age is not None else "N/A")
         
         else:
             st.warning("No responses in selected date range")
