@@ -292,10 +292,10 @@ def show_age_data():
 
                 # Ensure df is correctly formatted
                 fig = px.pie(df, names="age", values="count", 
-                title="Age Group Distribution",
+                title="AGD Pie Chart",
                 color_discrete_sequence=colours[:len(df)])  # Correct color slicing
 
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, use_container_width=False)
         else:
             st.warning("No responses in selected date range")
 
