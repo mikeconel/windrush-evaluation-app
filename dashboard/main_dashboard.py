@@ -276,7 +276,7 @@ def calculate_midpoint(age_range):
 
 def show_age_data():
     """Age Distribution"""
-    st.subheader("Age Distribution Metrics")
+    #st.subheader("Age Distribution Metrics")
     
     try:
         participants = Participant.objects.filter(
