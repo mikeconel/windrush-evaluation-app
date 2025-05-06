@@ -263,6 +263,42 @@ def show_preferred_event_format():
     except Exception as e:
         st.warning(f"Error loading format data: {str(e)}")
 
+def show_age_data():
+    """Age Distribution"""
+    st.subheader("Age Distribution Metrics")
+    
+    try:
+        participants = Participant.objects.filter(
+            created_at__date__gte=st.session_state.date_range[0],
+            created_at__date__lte=st.session_state.date_range[1]
+        )
+        
+        count = participants.count()
+        
+        if count > 0:  # Use count instead of `.exists()`
+            df = pd.DataFrame(
+                participants.annotate(date=TruncDate('created_at'))
+                .values('date', 'age')
+                .annotate(count=Count('id'))
+            )
+
+            if not df.empty:  # Corrected check for DataFrame existence
+                fig = px.bar(df, x='age', y='count', 
+                             title="Age Group Distribution",
+                             category_orders={"age": [c[0] for c in Participant.AGE_RANGES]})
+                st.plotly_chart(fig, use_container_width=True)
+
+                # Corrected line chart implementation
+                st.line_chart(df.set_index("age")["count"], color='#d4af37')
+        else:
+            st.warning("No responses in selected date range")
+
+    except Participant.DoesNotExist:
+        st.error("Participants not found")
+    except Exception as e:
+        st.warning(f"Error loading age data: {str(e)}")
+
+
 
 def show_private_insights(_private_data):
     """Admin analytics dashboard"""
@@ -295,12 +331,13 @@ def show_private_insights(_private_data):
         
         # Age Distribution
         with col1:
-            age_data = Participant.objects.values('age').annotate(count=Count('id'))
+            show_age_data()
+            '''age_data = Participant.objects.values('age').annotate(count=Count('id'))
             if age_data.exists():
                 fig = px.bar(age_data, x='age', y='count', 
                            title="Age Group Distribution",
                            category_orders={"age": [c[0] for c in Participant.AGE_RANGES]})
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, use_container_width=True)'''
 
                 # # === Left Column: Age Metrics ===
 #         #with col1:
