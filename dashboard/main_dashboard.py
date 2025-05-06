@@ -263,6 +263,17 @@ def show_preferred_event_format():
     except Exception as e:
         st.warning(f"Error loading format data: {str(e)}")
 
+age_ranges = ["18-24", "25-34", "35-44", "45-54", "55-64", "65-74", "75-89", "90+"]
+
+# Function to calculate midpoint
+def calculate_midpoint(age_range):
+    """Convert age range (e.g., '18-24') to midpoint value."""
+    if "+" in age_range:  # Handle '90+'
+        return 95  # Assume 95 for 90+
+    else:
+        lower, upper = map(int, age_range.split("-"))
+        return (lower + upper) / 2
+
 def show_age_data():
     """Age Distribution"""
     st.subheader("Age Distribution Metrics")
@@ -275,17 +286,17 @@ def show_age_data():
         
         count = participants.count()
         
-        if count > 0:  # Use count instead of `.exists()`
+        if count > 0:  
             df = pd.DataFrame(
                 participants.annotate(date=TruncDate('created_at'))
-                .annotate(count=Count('id'))  # Ensure count is included
+                .annotate(count=Count('id'))
                 .values('date', 'age', 'count')
             )
 
-            if not df.empty:  # Corrected check for DataFrame existence
+            if not df.empty:  
                 fig = px.bar(df, x='age', y='count', 
                              title="Age Group Distribution",
-                             category_orders={"age": [c[0] for c in Participant.AGE_RANGES]})
+                             category_orders={"age": age_ranges})
                 st.plotly_chart(fig, use_container_width=True)
 
                 colours = ["brown", "red", "black", "green", "gold", "blue", "gray", "yellow", "white"]
@@ -293,31 +304,35 @@ def show_age_data():
                 # Ensure df is correctly formatted
                 fig = px.pie(df, names="age", values="count", 
                              title="AGD Pie Chart",
-                             color_discrete_sequence=colours[:len(df)])  # Correct color slicing
+                             color_discrete_sequence=colours[:len(df)])  
                 
                 # Reduce the size of the pie chart
                 fig.update_layout(
-                    width=400,  # Adjust width
-                    height=400  # Adjust height
+                    width=400,  
+                    height=400  
                 )
                 st.plotly_chart(fig, use_container_width=True)
 
                 st.subheader("Age Overview")
                 
-                # Convert age to numeric to ensure correct calculations
-                df['age'] = pd.to_numeric(df['age'], errors='coerce')
+                # Convert age ranges to midpoints
+                df['age_midpoint'] = df['age'].apply(calculate_midpoint)
 
                 # Debugging output
-                st.write("Debugging Age Data:", df['age'])
+                st.write("Debugging Age Midpoints:", df[['age', 'age_midpoint']])
+
                 # Drop NaN values before calculating statistics
-                df_clean = df.dropna(subset=['age'])
+                df_clean = df.dropna(subset=['age_midpoint'])
 
                 if not df_clean.empty:
-                    avg_age = df_clean['age'].mean()
-                    max_age = df_clean['age'].max()
-                    min_age = df_clean['age'].min()
+                    avg_age = df_clean['age_midpoint'].mean()
+                    max_age = df_clean['age_midpoint'].max()
+                    min_age = df_clean['age_midpoint'].min()
                 else:
                     avg_age, max_age, min_age = None, None, None
+
+                # Nested horizontal layout for age metrics
+
 
                 # Nested horizontal layout for age metrics
                 age_col1, age_col2, age_col3 = st.columns(3)
