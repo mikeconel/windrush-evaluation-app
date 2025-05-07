@@ -356,7 +356,7 @@ def show_demographic_breakdown():
             created_at__date__gte=st.session_state.date_range[0],
             created_at__date__lte=st.session_state.date_range[1]
         )
-                if participants.exists():  
+        if participants.exists():  
             df = pd.DataFrame(
                 participants.annotate(date=TruncDate('created_at'))
                 .values('gender', 'ethnicity')
