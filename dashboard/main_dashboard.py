@@ -349,6 +349,31 @@ def show_age_data():
         st.warning(f"Error loading age data: {str(e)}")
 
 
+def show_demographic_breakdown():
+    '''Gender-Ethnicity Sunburst'''
+    try:
+        participants = Participant.objects.filter(
+            created_at__date__gte=st.session_state.date_range[0],
+            created_at__date__lte=st.session_state.date_range[1]
+        )
+        if participants:  
+            df = pd.DataFrame(
+                participants.annotate(date=TruncDate('created_at'))
+                .annotate(count=Count('id'))
+                .values('gender', 'ethnicity')
+            )
+            if not df.empty:
+                fig = px.sunburst(df, path=['gender', 'ethnicity'], 
+                                values='count', title="Demographic Breakdown")
+                st.plotly_chart(fig, use_container_width=True)
+            else:
+                st.warning("No responses in selected date range")
+
+    except Participant.DoesNotExist:
+        st.error("Participants not found")
+    except Exception as e:
+        st.warning(f"Error loading demographic breakdown: {str(e)}")
+
 
 
 def show_private_insights(_private_data):
@@ -382,11 +407,12 @@ def show_private_insights(_private_data):
         
         # Gender-Ethnicity Sunburst
         with col2:
-            demo_data = Participant.objects.values('gender', 'ethnicity').annotate(count=Count('id'))
-            if demo_data.exists():
-                fig = px.sunburst(demo_data, path=['gender', 'ethnicity'], 
-                                values='count', title="Demographic Breakdown")
-                st.plotly_chart(fig, use_container_width=True)
+            show_demographic_breakdown()
+            # demo_data = Participant.objects.values('gender', 'ethnicity').annotate(count=Count('id'))
+            # if demo_data.exists():
+            #     fig = px.sunburst(demo_data, path=['gender', 'ethnicity'], 
+            #                     values='count', title="Demographic Breakdown")
+            #     st.plotly_chart(fig, use_container_width=True)
         
         # Gender Distribution
         with col3:
