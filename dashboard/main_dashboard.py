@@ -356,15 +356,18 @@ def show_demographic_breakdown():
             created_at__date__gte=st.session_state.date_range[0],
             created_at__date__lte=st.session_state.date_range[1]
         )
-        if participants:  
+                if participants.exists():  
             df = pd.DataFrame(
                 participants.annotate(date=TruncDate('created_at'))
-                .annotate(count=Count('id'))
                 .values('gender', 'ethnicity')
             )
+
+            # Group by gender and ethnicity to count occurrences
+            df = df.groupby(['gender', 'ethnicity']).size().reset_index(name='count')
+
             if not df.empty:
                 fig = px.sunburst(df, path=['gender', 'ethnicity'], 
-                                values='count', title="Demographic Breakdown")
+                                  values='count', title="Demographic Breakdown")
                 st.plotly_chart(fig, use_container_width=True)
             else:
                 st.warning("No responses in selected date range")
