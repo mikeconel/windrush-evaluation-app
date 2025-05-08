@@ -397,7 +397,7 @@ def show_gender_data():
 
             if not df.empty:
                 # Display gender metrics
-                
+                st.write("My df data:",df)
                 male_count = df[df['gender'] == 'Male']['count'].sum() if 'Male' in df['gender'].values else 0
                 female_count = df[df['gender'] == 'Female']['count'].sum() if 'Female' in df['gender'].values else 0
                 unspecified_count = df[df['gender'] == 'Not Specified']['count'].sum() if 'Not Specified' in df['gender'].values else 0
@@ -457,7 +457,7 @@ def show_private_insights(_private_data):
         
         # Gender Distribution
         with col3:
-            st.subheader("Gender Distribution")
+            #st.subheader("Gender Distribution")
             show_gender_data()
             # gender_data = Participant.objects.values('gender') \
             #     .annotate(count=Count('id')) \
