@@ -399,8 +399,8 @@ def show_gender_data():
                 # Display gender metrics
                 st.write("My df data:",df)
                 male_count = df[df['gender'] == 'M']['count'].sum() if 'M' in df['gender'].values else 0
-                female_count = df[df['gender'] == 'Female']['count'].sum() if 'Female' in df['gender'].values else 0
-                unspecified_count = df[df['gender'] == 'Not Specified']['count'].sum() if 'Not Specified' in df['gender'].values else 0
+                female_count = df[df['gender'] == 'F']['count'].sum() if 'F' in df['gender'].values else 0
+                unspecified_count = df[df['gender'] == 'NS']['count'].sum() if 'NS' in df['gender'].values else 0
                 st.write(male_count,female_count)
                 # Bar chart visualization
                 colours = ['#1E3A8A', '#C4A747', '#94A3B8']
