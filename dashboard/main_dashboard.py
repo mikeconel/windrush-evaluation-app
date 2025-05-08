@@ -381,8 +381,8 @@ def show_gender_data():
     """Gender Distribution"""
     try:
         participants = Participant.objects.filter(
-            created_at__date__gte=st.session_state.daterange[0],
-            created_at__date__lte=st.session_state.daterange[1]
+            created_at__date__gte=st.session_state.date_range[0],
+            created_at__date__lte=st.session_state.date_range[1]
         )
 
         if participants.exists():
