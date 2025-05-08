@@ -397,14 +397,13 @@ def show_gender_data():
 
             if not df.empty:
                 # Display gender metrics
-                st.write("My df data:",df)
                 male_count = df[df['gender'] == 'M']['count'].sum() if 'M' in df['gender'].values else 0
                 female_count = df[df['gender'] == 'F']['count'].sum() if 'F' in df['gender'].values else 0
                 unspecified_count = df[df['gender'] == 'NS']['count'].sum() if 'NS' in df['gender'].values else 0
                 st.write(male_count,female_count)
                 # Bar chart visualization
                 colours = ['#1E3A8A', '#C4A747', '#94A3B8']
-                fig = px.bar(df, x='gender', y='count', title="Gender Distribution",color='gender', color_discrete_map={'Male': colours[0], 'Female': colours[1], 'Not Specified': colours[2]})
+                fig = px.bar(df, x='gender', y='count', title="Gender Distribution",color='gender', color_discrete_map={'M': colours[0], 'F': colours[1], 'NS': colours[2]})
                 st.plotly_chart(fig, use_container_width=True)
 
                 col1, col2, col3 = st.columns(3)                                                                                                     
