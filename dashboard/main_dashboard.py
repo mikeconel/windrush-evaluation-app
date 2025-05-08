@@ -377,7 +377,43 @@ def show_demographic_breakdown():
     except Exception as e:
         st.warning(f"Error loading demographic breakdown: {str(e)}")
 
+def show_gender_data():
+    """Gender Distribution"""
+    try:
+        participants = Participant.objects.filter(
+            created_at__date__gte=st.session_state.daterange[0],
+            created_at__date__lte=st.session_state.daterange[1]
+        )
 
+        if participants.exists():
+            # Create DataFrame with gender counts
+            df = pd.DataFrame(
+                participants.annotate(date=TruncDate('created_at'))
+                .values('gender')
+            )
+
+            # Group by gender and count occurrences
+            df = df.groupby(['gender']).size().reset_index(name='count')
+
+            if not df.empty:
+                # Display gender metrics
+                col1, col2, col3 = st.columns(3)
+                male_count = df[df['gender'] == 'Male']['count'].sum() if 'Male' in df['gender'].values else 0
+                female_count = df[df['gender'] == 'Female']['count'].sum() if 'Female' in df['gender'].values else 0
+                unspecified_count = df[df['gender'] == 'Not Specified']['count'].sum() if 'Not Specified' in df['gender'].values else 0
+
+                col1.metric("Male", male_count)
+                col2.metric("Female", female_count)
+                col3.metric("Not Specified", unspecified_count)
+                # Bar chart visualization
+                colours = ["blue", "pink", "gray"]
+                fig = px.bar(df, x='gender', y='count', title="Gender Distribution", color='gender', color_discrete_map={'Male': 'blue', 'Female': 'pink', 'Not Specified': 'gray'})
+                st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.error("No data for the dates you have selected")
+
+    except Exception as e:
+        st.error(f"Can't load data for gender: {str(e)}")
 
 def show_private_insights(_private_data):
     """Admin analytics dashboard"""
@@ -419,37 +455,59 @@ def show_private_insights(_private_data):
         
         # Gender Distribution
         with col3:
-            gender_data = Participant.objects.values('gender').annotate(count=Count('id'))
-            if gender_data.exists():
-                counts = [item['count'] for item in gender_data]
-                genders = [item['gender'] for item in gender_data]
-                
-                fig, ax = plt.subplots(figsize=(6, 4))
-                ax.barh(genders, counts, color=['#1E3A8A', '#C4A747', '#94A3B8'])
-                ax.set_xlabel('Participants')
-                ax.set_title('Gender Distribution')
-                st.pyplot(fig)
-            
             st.subheader("Gender Distribution")
-            gender_data = Participant.objects.values('gender') \
-                .annotate(count=Count('id')) \
-                    .order_by('-count')
+            show_gender_data()
+            # gender_data = Participant.objects.values('gender') \
+            #     .annotate(count=Count('id')) \
+            #         .order_by('-count')
     
-            if gender_data.exists():
-                # Create mapping from gender codes to labels
-                gender_labels = dict(Participant.GENDER_CHOICES)
-                counts = {
-                gender_labels[item['gender']]: item['count'] 
-                for item in gender_data
-                }
+            # if gender_data.exists():
+            #     # Create mapping from gender codes to labels
+            #     gender_labels = dict(Participant.GENDER_CHOICES)
+            #     counts = {
+            #     gender_labels[item['gender']]: item['count'] 
+            #     for item in gender_data
+            #     }
         
-                # Display metrics with proper labels
-                col1, col2, col3 = st.columns(3)
-                col1.metric("Male", counts.get('Male', 0))
-                col2.metric("Female", counts.get('Female', 0))
-                col3.metric("Not Specified", counts.get('Not Specified', 0))
-            else:
-                st.info("No gender data available")
+            #     # Display metrics with proper labels
+            #     col1, col2, col3 = st.columns(3)
+            #     col1.metric("Male", counts.get('Male', 0))
+            #     col2.metric("Female", counts.get('Female', 0))
+            #     col3.metric("Not Specified", counts.get('Not Specified', 0))
+            # else:
+            #     st.info("No gender data available")
+            ###########################
+            #             gender_data = Participant.objects.values('gender').annotate(count=Count('id'))
+            # if gender_data.exists():
+            #     counts = [item['count'] for item in gender_data]
+            #     genders = [item['gender'] for item in gender_data]
+                
+            #     fig, ax = plt.subplots(figsize=(6, 4))
+            #     ax.barh(genders, counts, color=['#1E3A8A', '#C4A747', '#94A3B8'])
+            #     ax.set_xlabel('Participants')
+            #     ax.set_title('Gender Distribution')
+            #     st.pyplot(fig)
+            
+            # st.subheader("Gender Distribution")
+            # gender_data = Participant.objects.values('gender') \
+            #     .annotate(count=Count('id')) \
+            #         .order_by('-count')
+    
+            # if gender_data.exists():
+            #     # Create mapping from gender codes to labels
+            #     gender_labels = dict(Participant.GENDER_CHOICES)
+            #     counts = {
+            #     gender_labels[item['gender']]: item['count'] 
+            #     for item in gender_data
+            #     }
+        
+            #     # Display metrics with proper labels
+            #     col1, col2, col3 = st.columns(3)
+            #     col1.metric("Male", counts.get('Male', 0))
+            #     col2.metric("Female", counts.get('Female', 0))
+            #     col3.metric("Not Specified", counts.get('Not Specified', 0))
+            # else:
+            #     st.info("No gender data available")
 
     # Add force refresh button
     if st.button("Refresh All Data"):
