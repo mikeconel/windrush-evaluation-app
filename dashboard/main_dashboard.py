@@ -398,7 +398,7 @@ def show_gender_data():
             if not df.empty:
                 # Display gender metrics
                 st.write("My df data:",df)
-                male_count = df[df['gender'] == 'Male']['count'].sum() if 'Male' in df['gender'].values else 0
+                male_count = df[df['gender'] == 'M']['count'].sum() if 'M' in df['gender'].values else 0
                 female_count = df[df['gender'] == 'Female']['count'].sum() if 'Female' in df['gender'].values else 0
                 unspecified_count = df[df['gender'] == 'Not Specified']['count'].sum() if 'Not Specified' in df['gender'].values else 0
                 st.write(male_count,female_count)
@@ -408,7 +408,7 @@ def show_gender_data():
                 st.plotly_chart(fig, use_container_width=True)
 
                 col1, col2, col3 = st.columns(3)                                                                                                     
-                col1.metric("Male", df)
+                col1.metric("Male", male_count)
                 col2.metric("Female", female_count)
                 col3.metric("Not Specified", unspecified_count)     
         else:
