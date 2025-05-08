@@ -400,7 +400,7 @@ def show_gender_data():
                 male_count = df[df['gender'] == 'M']['count'].sum() if 'M' in df['gender'].values else 0
                 female_count = df[df['gender'] == 'F']['count'].sum() if 'F' in df['gender'].values else 0
                 unspecified_count = df[df['gender'] == 'NS']['count'].sum() if 'NS' in df['gender'].values else 0
-                st.write(male_count,female_count)
+                
                 # Bar chart visualization
                 colours = ['#1E3A8A', '#C4A747', '#94A3B8']
                 fig = px.bar(df, x='gender', y='count', title="Gender Distribution",color='gender', color_discrete_map={'M': colours[0], 'F': colours[1], 'NS': colours[2]})
