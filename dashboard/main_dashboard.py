@@ -407,7 +407,6 @@ def show_gender_data():
                 fig = px.bar(df, x='gender', y='count', title="Gender Distribution",color='gender', color_discrete_map={'Male': colours[0], 'Female': colours[1], 'Not Specified': colours[2]})
                 st.plotly_chart(fig, use_container_width=True)
 
-                for idx, gender in df.itrow():
                 col1, col2, col3 = st.columns(3)                                                                                                     
                 col1.metric("Male", df)
                 col2.metric("Female", female_count)
