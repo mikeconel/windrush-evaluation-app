@@ -144,7 +144,7 @@ def handle_dates():
 
     # Show date picker with absolute boundaries
     new_dates = st.date_input(
-        "Select Date Range",label='Date',
+        "Select Date Range",
         value=st.session_state.date_range,
         min_value=st.session_state.absolute_dates[0],
         max_value=st.session_state.absolute_dates[1],
