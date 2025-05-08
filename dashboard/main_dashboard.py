@@ -397,18 +397,20 @@ def show_gender_data():
 
             if not df.empty:
                 # Display gender metrics
-                col1, col2, col3 = st.columns(3)
+                
                 male_count = df[df['gender'] == 'Male']['count'].sum() if 'Male' in df['gender'].values else 0
                 female_count = df[df['gender'] == 'Female']['count'].sum() if 'Female' in df['gender'].values else 0
                 unspecified_count = df[df['gender'] == 'Not Specified']['count'].sum() if 'Not Specified' in df['gender'].values else 0
-
+                
+                # Bar chart visualization
+                colours = ['#1E3A8A', '#C4A747', '#94A3B8']
+                fig = px.barh(df, x='gender', y='count', title="Gender Distribution", color='gender', color_discrete_map={'Male': '#1E3A8A', 'Female': '#C4A747, 'Not Specified': '#94A3B8'})
+                st.plotly_chart(fig, use_container_width=True)
+                                                                                                                          
+                col1, col2, col3 = st.columns(3)                                                                                                     
                 col1.metric("Male", male_count)
                 col2.metric("Female", female_count)
-                col3.metric("Not Specified", unspecified_count)
-                # Bar chart visualization
-                colours = ["blue", "pink", "gray"]
-                fig = px.bar(df, x='gender', y='count', title="Gender Distribution", color='gender', color_discrete_map={'Male': 'blue', 'Female': 'pink', 'Not Specified': 'gray'})
-                st.plotly_chart(fig, use_container_width=True)
+                col3.metric("Not Specified", unspecified_count)     
         else:
             st.error("No data for the dates you have selected")
 
