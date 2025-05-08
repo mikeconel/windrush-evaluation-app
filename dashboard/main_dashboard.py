@@ -408,7 +408,7 @@ def show_gender_data():
                 st.plotly_chart(fig, use_container_width=True)
                                                                                                                           
                 col1, col2, col3 = st.columns(3)                                                                                                     
-                col1.metric("Male", male_count)
+                col1.metric("Male", df['gender'])
                 col2.metric("Female", female_count)
                 col3.metric("Not Specified", unspecified_count)     
         else:
