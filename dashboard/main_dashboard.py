@@ -419,8 +419,10 @@ def show_gender_data():
 def show_completion():
     '''Showing the evaluation Form completition rate.'''
     try:
-        sessions=EvaluationSession.objects.filter(created_at__date__gte=st.session_state.date_range[0],
-                                            created_at__date__lte=st.session_state.date_range[1])
+        sessions=EvaluationSession.objects..filter(
+            created_at__date__gte=st.session_state.date_range[0],
+            created_at__date__lte=st.session_state.date_range[1])
+        
         if sessions.exists():
             total_sessions=sessions.count()
             completed_sessions=sessions.filter(completed=True).count()
@@ -434,7 +436,7 @@ def show_completion():
             st.warning("No sessions found in the selected date range.")
     
     except Exception as e:
-        st.error(f"Can't load data for Form Comletion: {str(e)}")
+        st.error(f"Can't load data for Form Completion: {str(e)}")
 
 def show_private_insights(_private_data):
     """Admin analytics dashboard"""
