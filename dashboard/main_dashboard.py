@@ -424,8 +424,8 @@ def show_completion():
                  completed=Count('id', filter=Q(completed=True)))
         st.write(sessions)
         sessions=EvaluationSession.objects.filter(
-            started_at__date__gte=st.session_state.date_range[0],
-            started_at__date__lte=st.session_state.date_range[1])
+            completed_at__date__gte=st.session_state.date_range[0],
+            completed_at__date__lte=st.session_state.date_range[1])
         
         if sessions.exists():
             total_sessions=sessions.count()
