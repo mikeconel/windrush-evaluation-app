@@ -416,6 +416,26 @@ def show_gender_data():
     except Exception as e:
         st.error(f"Can't load data for gender: {str(e)}")
 
+def show_completion():
+    '''Showing the evaluation Form completition rate.'''
+    try:
+        sessions=EvaluationSession.objects.filter(created_at__date__gte=st.session_state.date_range[0],
+                                            created_at__date__lte=st.session_state.date_range[1])
+        if sessions.exists():
+            total_sessions=sessions.count()
+            completed_sessions=sessions.filter(completed=True).count()
+        
+            if total_sessions > 0:
+                rate = (completed_sessions / total_sessions) * 100
+                st.metric("Form Completion Rate", f"{rate:.1f}%")
+            else:
+                st.warning("No sessions found in the selected date range.")
+        else:
+            st.warning("No sessions found in the selected date range.")
+    
+    except Exception as e:
+        st.error(f"Can't load data for Form Comletion: {str(e)}")
+
 def show_private_insights(_private_data):
     """Admin analytics dashboard"""
     st.header("Administrator Dashboard")
@@ -568,13 +588,15 @@ def show_private_insights(_private_data):
         
         # Completion Rates
         with tab1:
-            sessions = EvaluationSession.objects.aggregate(
-                total=Count('id'),
-                completed=Count('id', filter=Q(completed=True))
-            )
-            if sessions['total'] > 0:
-                rate = (sessions['completed'] / sessions['total']) * 100
-                st.metric("Form Completion Rate", f"{rate:.1f}%")
+            show_completion()
+            # sessions = EvaluationSession.objects.aggregate(
+            #     total=Count('id'),
+            #     completed=Count('id', filter=Q(completed=True))
+            # )
+            # if sessions['total'] > 0:
+            #     rate = (sessions['completed'] / sessions['total']) * 100
+            #     st.metric("Form Completion Rate", f"{rate:.1f}%")
+
         
         # Accessibility Needs
         with tab2:
