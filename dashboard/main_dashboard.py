@@ -419,6 +419,10 @@ def show_gender_data():
 def show_completion():
     '''Showing the evaluation Form completition rate.'''
     try:
+        sessions = EvaluationSession.objects.aggregate(
+                 total=Count('id'),
+                 completed=Count('id', filter=Q(completed=True))
+        st.write(sessions)
         sessions=EvaluationSession.objects.filter(
             created_at__date__gte=st.session_state.date_range[0],
             created_at__date__lte=st.session_state.date_range[1])
