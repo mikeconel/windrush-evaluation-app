@@ -421,7 +421,7 @@ def show_completion():
     try:
         sessions = EvaluationSession.objects.aggregate(
                  total=Count('id'),
-                 completed=Count('id', filter=Q(completed=True))
+                 completed=Count('id', filter=Q(completed=True)))
         st.write(sessions)
         sessions=EvaluationSession.objects.filter(
             created_at__date__gte=st.session_state.date_range[0],
