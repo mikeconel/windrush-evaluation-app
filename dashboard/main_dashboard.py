@@ -438,6 +438,55 @@ def show_completion():
     except Exception as e:
         st.error(f"Can't load data for Form Completion: {str(e)}")
 
+
+
+def show_accessibility_needs():
+    """This function shows accessibility needs."""
+    try:
+        participants = Participant.objects.filter(
+            created_at__date__gte=st.session_state.date_range[0],
+            created_at__date__lte=st.session_state.date_range[1]
+        )
+
+        # Convert queryset to DataFrame
+        df = pd.DataFrame(
+            participants.annotate(date=TruncDate('created_at'))
+            .values('accessibility_needs')
+        )
+
+        # Group by accessibility needs and count occurrences
+        df = df.groupby(['accessibility_needs']).size().reset_index(name='count')
+
+        if not df.empty:
+            # Display accessibility needs metrics
+            needs = [
+                'hard hearing', 'Need Car', 'No', 'Walking Stick', 'Wheelchair', 'assistive_technology',
+                'cognitive_or_neurodiversity', 'dietary_accommodations', 'hearing_assistance',
+                'mobility_support', 'no_accessibility_needs', 'visual_assistance'
+            ]
+
+            # Create Streamlit columns for metrics
+            col1, col2, col3 = st.columns(3)
+
+            for need in needs:
+                count = df[df['accessibility_needs'] == need]['count'].sum() if need in df['accessibility_needs'].values else 0
+                if need == "Walking Stick":
+                    col1.metric("Walking Stick", count)
+                elif need == "Wheelchair":
+                    col2.metric("Wheelchair", count)
+                elif need == "No":
+                    col3.metric("No Accessibility Needs", count)
+
+            # Bar chart visualization
+            fig = px.bar(df, x='accessibility_needs', y='count', title="Accessibility Requirements")
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.write("No data for the chosen dates.")   
+
+    except Exception as e:
+        st.error(f"Can't load data because: {str(e)}")
+
+
 def show_private_insights(_private_data):
     """Admin analytics dashboard"""
     st.header("Administrator Dashboard")
@@ -602,12 +651,13 @@ def show_private_insights(_private_data):
         
         # Accessibility Needs
         with tab2:
-            needs = Participant.objects.exclude(accessibility_needs__exact='')\
-                     .values('accessibility_needs').annotate(count=Count('id'))
-            if needs.exists():
-                fig = px.bar(needs, x='accessibility_needs', y='count',
-                           title="Accessibility Requirements")
-                st.plotly_chart(fig, use_container_width=True)
+            show_accessibility_needs()
+            # needs = Participant.objects.exclude(accessibility_needs__exact='')\
+            #          .values('accessibility_needs').annotate(count=Count('id'))
+            # if needs.exists():
+            #     fig = px.bar(needs, x='accessibility_needs', y='count',
+            #                title="Accessibility Requirements")
+            #     st.plotly_chart(fig, use_container_width=True)
         
         # Referral Sources
         with tab3:
