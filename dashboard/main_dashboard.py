@@ -693,7 +693,7 @@ def show_private_insights(_private_data):
         with tab3:
             col1,col2=st.columns(2)
             with col1:
-                show_Marketing_referrals()
+                show_marketing_referrals()
                 # referrals = Participant.objects.exclude(referral_source__exact='')
                 # if referrals.exists():
                 #     sources = pd.DataFrame(list(
