@@ -459,7 +459,7 @@ def show_accessibility_needs():
 
         if not df.empty:
             # Display accessibility needs metrics
-            needs = [
+            needs = ['Not sure',
                 'hard hearing', 'Need Car', 'No', 'Walking Stick', 'Wheelchair', 'assistive_technology',
                 'cognitive_or_neurodiversity', 'dietary_accommodations', 'hearing_assistance',
                 'mobility_support', 'no_accessibility_needs', 'visual_assistance'
@@ -479,7 +479,7 @@ def show_accessibility_needs():
                 #elif need == "Wheelchair":
                     #col2.metric("Wheelchair", count)
                 if need == "No":
-                    col3.metric("No Accessibility Needs", count)
+                    col2.metric("No Accessibility Needs", count)
         else:
             st.write("No data for the chosen dates.")   
 
