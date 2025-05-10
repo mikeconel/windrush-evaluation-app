@@ -487,6 +487,36 @@ def show_accessibility_needs():
         st.error(f"Can't load data because: {str(e)}")
 
 
+def show_marketing_referrals():
+    """General Marketing Referrals"""
+    try:
+        referrals = Participant.objects.filter(
+            created_at__date__gte=st.session_state.date_range[0],
+            created_at__date__lte=st.session_state.date_range[1]
+        )
+
+        # Convert queryset to DataFrame
+        df = pd.DataFrame(
+            referrals.annotate(date=TruncDate('created_at'))
+            .values('referral_source')
+        )
+
+        # Group by referral source and count occurrences
+        df = df.groupby(['referral_source']).size().reset_index(name='count')
+
+        if not df.empty:
+            # Pie chart visualization
+            fig = px.pie(df, names='referral_source', values='count',
+                         title="Referral Sources Breakdown", hole=0.3)
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.error("No referrals for the chosen dates.")
+
+    except Exception as e:
+        st.error(f"Error loading data for Marketing: {str(e)}")
+
+
+
 def show_private_insights(_private_data):
     """Admin analytics dashboard"""
     st.header("Administrator Dashboard")
