@@ -465,21 +465,21 @@ def show_accessibility_needs():
                 'mobility_support', 'no_accessibility_needs', 'visual_assistance'
             ]
 
+            # Bar chart visualization
+            fig = px.bar(df, x='accessibility_needs', y='count', title="Accessibility Requirements")
+            st.plotly_chart(fig, use_container_width=True)
+            
             # Create Streamlit columns for metrics
             col1, col2, col3 = st.columns(3)
 
             for need in needs:
                 count = df[df['accessibility_needs'] == need]['count'].sum() if need in df['accessibility_needs'].values else 0
-                if need == "Walking Stick":
-                    col1.metric("Walking Stick", count)
-                elif need == "Wheelchair":
-                    col2.metric("Wheelchair", count)
-                elif need == "No":
+                #if need == "Walking Stick":
+                    #col1.metric("Walking Stick", count)
+                #elif need == "Wheelchair":
+                    #col2.metric("Wheelchair", count)
+                if need == "No":
                     col3.metric("No Accessibility Needs", count)
-
-            # Bar chart visualization
-            fig = px.bar(df, x='accessibility_needs', y='count', title="Accessibility Requirements")
-            st.plotly_chart(fig, use_container_width=True)
         else:
             st.write("No data for the chosen dates.")   
 
