@@ -693,14 +693,16 @@ def show_private_insights(_private_data):
         with tab3:
             col1,col2=st.columns(2)
             with col1:
-                referrals = Participant.objects.exclude(referral_source__exact='')
-                if referrals.exists():
-                    sources = pd.DataFrame(list(
-                        referrals.values('referral_source').annotate(count=Count('id'))
-                    ))
-                    fig = px.pie(sources, names='referral_source', values='count',
-                            title="Referral Sources Breakdown", hole=0.3)
-                    st.plotly_chart(fig, use_container_width=True)
+                show_Marketing_referrals()
+                # referrals = Participant.objects.exclude(referral_source__exact='')
+                # if referrals.exists():
+                #     sources = pd.DataFrame(list(
+                #         referrals.values('referral_source').annotate(count=Count('id'))
+                #     ))
+                #     fig = px.pie(sources, names='referral_source', values='count',
+                #             title="Referral Sources Breakdown", hole=0.3)
+                #     st.plotly_chart(fig, use_container_width=True)
+            
             
             with col2:
                 #with col2:
