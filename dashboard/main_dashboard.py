@@ -753,7 +753,7 @@ def show_private_insights(_private_data):
             
             with col2:
                 #with col2:
-                        #         show_social_media_question()
+                show_social_media_question()
         #         social_media_question = Question.objects.filter(text__icontains="If you chose Social Media").first()
     
         #         if social_media_question:
@@ -796,9 +796,7 @@ def show_private_insights(_private_data):
         #             else:
         #                 st.write("No responses yet for this question")
         #         else:
-        #             st.write("Question not found")
-
-        
+        #             st.write("Question not found")        
     
 #################################################
     with st.expander("Private Data", expanded=True):
