@@ -519,7 +519,7 @@ def show_marketing_referrals():
 def show_social_media_question():
     """Social Media Preference"""
     try:
-        participants = Participant.objects.filter(
+        participants = Response.objects.filter(
             created_at__date__gte=st.session_state.date_range[0],
             created_at__date__lte=st.session_state.date_range[1]
         )
