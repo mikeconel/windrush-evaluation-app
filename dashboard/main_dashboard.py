@@ -516,6 +516,53 @@ def show_marketing_referrals():
         st.error(f"Error loading data for Marketing: {str(e)}")
 
 
+def show_social_media_question():
+    """Social Media Preference"""
+    try:
+        participants = Participant.objects.filter(
+            created_at__date__gte=st.session_state.date_range[0],
+            created_at__date__lte=st.session_state.date_range[1]
+        )
+
+        # Convert queryset to DataFrame
+        df = pd.DataFrame(
+            participants.annotate(date=TruncDate('created_at'))
+            .values('answer')
+        )
+
+        if not df.empty:
+            # Group by answer and count occurrences
+            df = df.groupby(['answer']).size().reset_index(name='count')
+
+            # Calculate percentages
+            total = df['count'].sum()
+            df['Percentage'] = (df['count'] / total * 100).round(1)
+
+            # Create pie chart
+            fig = px.pie(df, names='answer', values='count',
+                         title="Social Media Platform Distribution",
+                         hole=0.3)
+
+            # Position legend and labels
+            fig.update_layout(
+                legend=dict(
+                    orientation="v",
+                    yanchor="top",
+                    y=0.95,
+                    xanchor="left",
+                    x=1.05
+                ),
+                showlegend=True
+            )
+
+            st.plotly_chart(fig, use_container_width=True)
+
+        else:
+            st.error("No social media answers found for chosen dates.")
+
+    except Exception as e:
+        st.error(f"Error loading data for Social Media: {str(e)}")
+
 
 def show_private_insights(_private_data):
     """Admin analytics dashboard"""
