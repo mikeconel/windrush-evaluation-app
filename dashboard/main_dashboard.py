@@ -519,17 +519,12 @@ def show_marketing_referrals():
 def show_social_media_question():
     """Social Media Preference"""
     try:
-        participants = Response.objects.filter(
-            created_at__date__gte=st.session_state.date_range[0],
-            created_at__date__lte=st.session_state.date_range[1]
-        )
-
-        # Convert queryset to DataFrame
-        df = pd.DataFrame(
-            participants.annotate(date=TruncDate('created_at'))
-            .values('answer')
-        )
-
+        social_media_question = Question.objects.filter(text__icontains="If you chose Social Media").first()
+    
+        responses=Response.objects.filter(social_media_question,created_at__date__gte = st.session_state.date_range[0],
+                                               created_at__date__lte = st.session_state.date_range[1])
+        df=pd.DataFrame(responses.annotate(date=TruncDate('created_at').values('answer'.strip('"'))))
+        
         if not df.empty:
             # Group by answer and count occurrences
             df = df.groupby(['answer']).size().reset_index(name='count')
