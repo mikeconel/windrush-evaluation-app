@@ -516,11 +516,6 @@ def show_marketing_referrals():
         st.error(f"Error loading data for Marketing: {str(e)}")
 
 
-import streamlit as st
-import pandas as pd
-import plotly.express as px
-from django.db.models.functions import TruncDate
-
 def show_social_media_question():
     """Social Media Preference"""
     try:
@@ -541,19 +536,19 @@ def show_social_media_question():
         # Convert queryset to DataFrame
         df = pd.DataFrame(
             responses.annotate(date=TruncDate('created_at'))
-            .values('answer')
+            .values('response')
         )
 
         if not df.empty:
-            # Group by answer and count occurrences
-            df = df.groupby(['answer']).size().reset_index(name='count')
+            # Group by response and count occurrences
+            df = df.groupby(['response']).size().reset_index(name='count')
 
             # Calculate percentages
             total = df['count'].sum()
             df['Percentage'] = (df['count'] / total * 100).round(1)
 
             # Create pie chart
-            fig = px.pie(df, names='answer', values='count',
+            fig = px.pie(df, names='response', values='count',
                          title="Social Media Platform Distribution",
                          hole=0.3)
 
