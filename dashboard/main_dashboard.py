@@ -753,50 +753,51 @@ def show_private_insights(_private_data):
             
             with col2:
                 #with col2:
-                social_media_question = Question.objects.filter(text__icontains="If you chose Social Media").first()
+                        #         show_social_media_question()
+        #         social_media_question = Question.objects.filter(text__icontains="If you chose Social Media").first()
     
-                if social_media_question:
-                    #st.subheader("Social Media Platforms Usage")
+        #         if social_media_question:
+        #             #st.subheader("Social Media Platforms Usage")
         
-        # Get aggregated data
-                    platform_counts = Response.objects.filter(question=social_media_question) \
-                        .values('answer') \
-                            .annotate(count=Count('id')) \
-                                .order_by('answer')
+        # # Get aggregated data
+        #             platform_counts = Response.objects.filter(question=social_media_question) \
+        #                 .values('answer') \
+        #                     .annotate(count=Count('id')) \
+        #                         .order_by('answer')
                    
-                    cleaned_data=[{'answer':items['answer'].strip('"'),'count':items['count']} for items in platform_counts]
-                    # Create DataFrame with proper structure
-                    df = pd.DataFrame(cleaned_data) \
-                    .rename(columns={'answer': 'Platform', 'count': 'Count'})
-                    if not df.empty:
-                    # Calculate percentages
-                        total = df['Count'].sum()
-                        df['Percentage'] = (df['Count'] / total * 100).round(1)
+        #             cleaned_data=[{'answer':items['answer'].strip('"'),'count':items['count']} for items in platform_counts]
+        #             # Create DataFrame with proper structure
+        #             df = pd.DataFrame(cleaned_data) \
+        #             .rename(columns={'answer': 'Platform', 'count': 'Count'})
+        #             if not df.empty:
+        #             # Calculate percentages
+        #                 total = df['Count'].sum()
+        #                 df['Percentage'] = (df['Count'] / total * 100).round(1)
             
-                    # Create pie chart
-                        fig = px.pie(df, 
-                                 names='Platform',
-                                 values='Count',
-                                 title="Social Media Platform Distribution",
-                                 hole=0.3)
+        #             # Create pie chart
+        #                 fig = px.pie(df, 
+        #                          names='Platform',
+        #                          values='Count',
+        #                          title="Social Media Platform Distribution",
+        #                          hole=0.3)
             
-                    # Position legend and labels
-                        fig.update_layout(
-                        legend=dict(
-                            orientation="v",
-                            yanchor="top",
-                            y=0.95,
-                            xanchor="left",
-                            x=1.05),
-                            showlegend=True
-                            )
+        #             # Position legend and labels
+        #                 fig.update_layout(
+        #                 legend=dict(
+        #                     orientation="v",
+        #                     yanchor="top",
+        #                     y=0.95,
+        #                     xanchor="left",
+        #                     x=1.05),
+        #                     showlegend=True
+        #                     )
             
-                        st.plotly_chart(fig, use_container_width=True)
-                    else:
-                        st.write("No responses yet for this question")
-                else:
-                    st.write("Question not found")
-        
+        #                 st.plotly_chart(fig, use_container_width=True)
+        #             else:
+        #                 st.write("No responses yet for this question")
+        #         else:
+        #             st.write("Question not found")
+
         
     
 #################################################
