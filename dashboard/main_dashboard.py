@@ -628,6 +628,73 @@ def show_social_media_question():
     except Exception as e:
         st.error(f"Error loading data for Social Media: {str(e)}")
 
+def show_sentiments():
+    """Sentiment Analysis"""
+    try:
+        # Get the relevant question
+        sentiment_question = Question.objects.filter(question_id=15).first()
+
+        if not sentiment_question:
+            st.error("Sentiment question not found.")
+            return
+
+        # Filter responses based on the question and date range
+        sentiment_response = Response.objects.filter(
+            question=sentiment_question,
+            created_at__date__gte=st.session_state.date_range[0],
+            created_at__date__lte=st.session_state.date_range[1]
+        )
+        # Convert queryset to DataFrame
+        df = pd.DataFrame(
+            sentiment_response.values('answer')
+        )
+        if not df.empty:
+            # Group by answer and count occurrences
+            df = df.groupby(['answer']).size().reset_index(name='count')
+
+            st.subheader("Sentiment Analysis")
+
+            # Get analysis results
+            sentiment_results = sentiment_analysis(df)
+
+            # Display in two columns for better layout
+            col1, col2 = st.columns([1, 3])
+
+            with col1:
+                # Show summary metrics
+                st.metric("Positive Responses", f"{sentiment_results.get('positive', 0)}%")
+                st.metric("Neutral Responses", f"{sentiment_results.get('neutral', 0)}%")
+                st.metric("Negative Responses", f"{sentiment_results.get('negative', 0)}%")
+
+            with col2:
+                # Show detailed dataframe
+                st.dataframe(pd.DataFrame.from_dict(sentiment_results, orient='index', columns=['Percentage']),
+                             use_container_width=True)
+
+                # Optional: Add visualization
+                fig = px.pie(names=list(sentiment_results.keys()),
+                             values=list(sentiment_results.values()), title="Sentiment Distribution", hole=0.6)
+
+                # Position legend and labels
+                fig.update_layout(
+                    legend=dict(
+                        orientation="v",
+                        yanchor="top",
+                        y=0.95,
+                        xanchor="left",
+                        x=0.65
+                    ),
+                    showlegend=True
+                )
+
+                st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.warning("No text responses available for sentiment analysis.")
+
+    except Exception as e:
+        st.error(f"Error loading data for sentiment analysis: {str(e)}")
+
+
 def show_private_insights(_private_data):
     """Admin analytics dashboard"""
     st.header("Administrator Dashboard")
@@ -867,43 +934,45 @@ def show_private_insights(_private_data):
         tab1, tab2 = st.tabs(["Sentiment Analysis","Private Data"])
         with tab1:
             # Perform sentiment analysis
+            show_sentiments()
             text_responses = Response.objects.filter(question_id='15').values_list('answer', flat=True)
     
-            if text_responses.exists():
-                st.subheader("Sentiment Analysis")
-            # Get analysis results
-                sentiment_results = sentiment_analysis(text_responses)
-            # Display in two columns for better layout
-                col1, col2 = st.columns([1, 3])
+            # if text_responses.exists():
+            #     st.subheader("Sentiment Analysis")
+            # # Get analysis results
+            #     sentiment_results = sentiment_analysis(text_responses)
+            # # Display in two columns for better layout
+            #     col1, col2 = st.columns([1, 3])
         
-                with col1:
-                    # Show summary metrics
-                    st.metric("Positive Responses", f"{sentiment_results.get('positive', 0)}%")
-                    st.metric("Neutral Responses", f"{sentiment_results.get('neutral', 0)}%")
-                    st.metric("Negative Responses", f"{sentiment_results.get('negative', 0)}%")
+            #     with col1:
+            #         # Show summary metrics
+            #         st.metric("Positive Responses", f"{sentiment_results.get('positive', 0)}%")
+            #         st.metric("Neutral Responses", f"{sentiment_results.get('neutral', 0)}%")
+            #         st.metric("Negative Responses", f"{sentiment_results.get('negative', 0)}%")
         
-                with col2:
-                # Show detailed dataframe
-                    st.dataframe(pd.DataFrame.from_dict(sentiment_results, orient='index', columns=['Percentage']),
-                                 use_container_width=True)
-                # Optional: Add visualization
-                fig = px.pie(names=list(sentiment_results.keys()),
-                             values=list(sentiment_results.values()),title="Sentiment Distribution", hole=0.6)
-                # Position legend and labels
-                fig.update_layout(
-                    legend=dict(
-                        orientation="v",
-                            yanchor="top",
-                            y=0.95,
-                            xanchor="left",
-                            x=0.65),
-                            showlegend=True
-                            )
+            #     with col2:
+            #     # Show detailed dataframe
+            #         st.dataframe(pd.DataFrame.from_dict(sentiment_results, orient='index', columns=['Percentage']),
+            #                      use_container_width=True)
+            #     # Optional: Add visualization
+            #     fig = px.pie(names=list(sentiment_results.keys()),
+            #                  values=list(sentiment_results.values()),title="Sentiment Distribution", hole=0.6)
+            #     # Position legend and labels
+            #     fig.update_layout(
+            #         legend=dict(
+            #             orientation="v",
+            #                 yanchor="top",
+            #                 y=0.95,
+            #                 xanchor="left",
+            #                 x=0.65),
+            #                 showlegend=True
+            #                 )
             
-                st.plotly_chart(fig, use_container_width=True)
+            #     st.plotly_chart(fig, use_container_width=True)
         
-            else:
-                st.warning("No text responses available for sentiment analysis")
+            # else:
+            #     st.warning("No text responses available for sentiment analysis")
+        
         with tab2:
             private_data = get_private_data()
             #st.write(private_data)
