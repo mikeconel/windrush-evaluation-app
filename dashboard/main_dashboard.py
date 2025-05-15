@@ -648,11 +648,11 @@ def show_sentiments():
         )
         # Convert queryset to DataFrame
         df = pd.DataFrame(
-            sentiment_response.values('sentiment_response')
+            sentiment_response.values('question')
         )
         if not df.empty:
             # Group by answer and count occurrences
-            df = df.groupby(['sentiment_response']).size().reset_index(name='count')
+            df = df.groupby(['question']).size().reset_index(name='count')
 
             st.subheader("Sentiment Analysis")
 
