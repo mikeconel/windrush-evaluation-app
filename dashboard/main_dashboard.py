@@ -634,7 +634,7 @@ def show_sentiments():
         # Get the relevant question
         #sentiment_question = Question.objects.filter(id=15).first()
         
-        sentiment_question = Question.objects.filter(text__icontains="'How has Windrush Foundation influenced your understanding of heritage?'").first()
+        sentiment_question = Question.objects.filter(text__icontains="How has Windrush Foundation influenced your understanding of heritage?").first()
 
         if not sentiment_question:
             st.error("Sentiment question not found.")
