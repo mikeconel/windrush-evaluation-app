@@ -634,7 +634,7 @@ def show_sentiments():
         # Get the relevant question
         #sentiment_question = Question.objects.filter(id=15).first()
         
-        sentiment_question = Question.objects.filter(text__icontains="How has Windrush Foundation influenced your understanding of heritage?").first()
+        sentiment_question = Question.objects.filter(text__icontains="'How has Windrush Foundation influenced your understanding of heritage?'").first()
 
         if not sentiment_question:
             st.error("Sentiment question not found.")
@@ -648,11 +648,11 @@ def show_sentiments():
         )
         # Convert queryset to DataFrame
         df = pd.DataFrame(
-            sentiment_response.values('participant_id')
+            sentiment_response.values('answer')
         )
         if not df.empty:
             # Group by answer and count occurrences
-            df = df.groupby(['participant_id']).size().reset_index(name='count')
+            df = df.groupby(['answer']).size().reset_index(name='count')
 
             st.subheader("Sentiment Analysis")
 
