@@ -713,8 +713,8 @@ def get_all_my_data():
             st.write("Private Data", df)
         else:
             st.error("No private data available for chosen dates.")       
-except Exception as e:
-    st.error(f"Sorry can't load private data: {str(e)}")
+    except Exception as e:
+        st.error(f"Sorry can't load private data: {str(e)}")
 
 
 def show_private_insights(_private_data):
