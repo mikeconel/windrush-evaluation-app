@@ -654,13 +654,13 @@ def show_sentiments():
             # Group by answer and count occurrences
             df = df.groupby(['answer']).size().reset_index(name='count')
 
-            df="Yes, I now know who I am. I now know a lot more. Yes, I now know who I am."
+            
 
             st.subheader("Sentiment Analysis")
 
             # Get analysis results
             #st.dataframe(df)
-            sentiment_results = sentiment_analysis([df])
+            sentiment_results = sentiment_analysis(df['answer'])
 
             # Display in two columns for better layout
             col1, col2 = st.columns([1, 3])
