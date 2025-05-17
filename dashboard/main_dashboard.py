@@ -652,7 +652,7 @@ def show_sentiments():
         )
         if not df.empty:
             # Group by answer and count occurrences
-            df = df.groupby(['answer']).size().reset_index(name='count')
+            df = df.groupby(['answer']).size()
 
             st.subheader("Sentiment Analysis")
 
