@@ -705,8 +705,8 @@ def get_all_my_data():
         private = get_private_data()
         private_data=Response.objects.filter(private_data,created_at_date_gte=st.session_state.date_range[0],
                                        created_at_date_lte=st.session_state.date_range[1])
-        df=pd.DataFrame(private_data.annotate(date=TruncDate('created_at'))
-            .values('answer')
+        
+        df=pd.DataFrame(private_data.annotate(date=TruncDate('created_at'))).values('answer')
         if not df.empty:
             df.groupby(['answer']).size().reset_index(name='count')
             #st.write("Private Data", private_data['responses'])
