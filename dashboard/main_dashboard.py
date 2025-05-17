@@ -700,6 +700,23 @@ def show_sentiments():
         st.error(f"Error loading data for sentiment analysis: {str(e)}")
 
 
+def get_all_my_data():
+    try:
+        private = get_private_data()
+        private_data=Response.objects.filter(private_data,created_at_date_gte=st.session_state.date_range[0],
+                                       created_at_date_lte=st.session_state.date_range[1])
+        df=pd.DataFrame(private_data.annotate(date=TruncDate('created_at'))
+            .values('answer')
+        if not df.empty:
+            df.groupby(['answer']).size().reset_index(name='count')
+            #st.write("Private Data", private_data['responses'])
+            st.write("Private Data", df)
+        else:
+            st.error("No private data available for chosen dates.")       
+except Exception as e:
+    st.error(f"Sorry can't load private data: {str(e)}")
+
+
 def show_private_insights(_private_data):
     """Admin analytics dashboard"""
     st.header("Administrator Dashboard")
@@ -973,15 +990,19 @@ def show_private_insights(_private_data):
             # else:
             #     st.warning("No text responses available for sentiment analysis")
 
+
+        
+        with tab2:
+            get_all_my_data()
+            #private_data = get_private_data()
+            #st.write(private_data)
+            #st.write("Private Data", private_data['responses'])
+            
 # Add force refresh button
     if st.button("Refresh All Data"):
         st.session_state.clear()
         st.rerun()
-        
-        with tab2:
-            private_data = get_private_data()
-            #st.write(private_data)
-            st.write("Private Data", private_data['responses'])
+    
     with st.expander("Other Metrics"):
         tab1, tab2, tab3, tab4 = st.tabs(["Presentation Format","About Windrush Foundation","Preferred Session Format", "Speaker Rating"])
         with tab1:
