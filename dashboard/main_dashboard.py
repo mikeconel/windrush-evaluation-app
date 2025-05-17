@@ -652,12 +652,11 @@ def show_sentiments():
         )
         if not df.empty:
             # Group by answer and count occurrences
-            df = df.groupby(['answer']).size()
+            df = df.groupby(['answer']).size().reset_index(name='count')
 
             st.subheader("Sentiment Analysis")
 
             # Get analysis results
-            #df="It was awesome, i loved it!!!, total Rubbish, I hated it!!. I found it to be okay, it was great."
             st.dataframe(df)
             sentiment_results = sentiment_analysis(df)
 
