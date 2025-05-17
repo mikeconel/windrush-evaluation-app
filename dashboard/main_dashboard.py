@@ -659,7 +659,7 @@ def show_sentiments():
             st.subheader("Sentiment Analysis")
 
             # Get analysis results
-            st.dataframe(df)
+            #st.dataframe(df)
             sentiment_results = sentiment_analysis([df])
 
             # Display in two columns for better layout
