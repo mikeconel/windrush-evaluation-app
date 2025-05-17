@@ -658,7 +658,7 @@ def show_sentiments():
 
             # Get analysis results
             #df="It was awesome, i loved it!!!, total Rubbish, I hated it!!. I found it to be okay, it was great."
-            sentiment_results = sentiment_analysis([df])
+            sentiment_results = sentiment_analysis(df)
 
             # Display in two columns for better layout
             col1, col2 = st.columns([1, 3])
@@ -791,11 +791,6 @@ def show_private_insights(_private_data):
             #     col3.metric("Not Specified", counts.get('Not Specified', 0))
             # else:
             #     st.info("No gender data available")
-
-    # Add force refresh button
-    if st.button("Refresh All Data"):
-        st.session_state.clear()
-        st.rerun()
 
     # Geographic Analysis
     with st.expander("Visitor Origins Analysis", expanded=True):
@@ -975,6 +970,11 @@ def show_private_insights(_private_data):
         
             # else:
             #     st.warning("No text responses available for sentiment analysis")
+
+# Add force refresh button
+    if st.button("Refresh All Data"):
+        st.session_state.clear()
+        st.rerun()
         
         with tab2:
             private_data = get_private_data()
