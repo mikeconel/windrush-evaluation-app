@@ -657,7 +657,7 @@ def show_sentiments():
             st.subheader("Sentiment Analysis")
 
             # Get analysis results
-            df="It was awesome, i loved it!!!, total Rubbish, I hated it!!. I found it to be okay, it was great."
+            #df="It was awesome, i loved it!!!, total Rubbish, I hated it!!. I found it to be okay, it was great."
             sentiment_results = sentiment_analysis([df])
 
             # Display in two columns for better layout
