@@ -658,6 +658,7 @@ def show_sentiments():
 
             # Get analysis results
             #df="It was awesome, i loved it!!!, total Rubbish, I hated it!!. I found it to be okay, it was great."
+            st.dataframe(df)
             sentiment_results = sentiment_analysis(df)
 
             # Display in two columns for better layout
