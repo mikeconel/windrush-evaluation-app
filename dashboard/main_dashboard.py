@@ -15,7 +15,7 @@ from PIL import Image
 from datetime import datetime
 #import nltk
 #nltk.download('punkt')
-from django.db.models import Count
+#from django.db.models import Count
 from django.db.models.functions import TruncDate
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -657,6 +657,7 @@ def show_sentiments():
             st.subheader("Sentiment Analysis")
 
             # Get analysis results
+            df="It was total Rubbish, I hated it."
             sentiment_results = sentiment_analysis(df)
 
             # Display in two columns for better layout
