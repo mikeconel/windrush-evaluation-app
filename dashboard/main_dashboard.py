@@ -736,7 +736,7 @@ def show_Presentation_Format():
                                                              created_at__date__lte=st.session_state.date_range[1])
             df=pd.DataFrame(event_format_counts.annotate(date=TruncDate('created_at')).values('answer','created_at'))
             if not df.empty: 
-                df.groupby(['answers']).size().reset_index(name='count')
+                df.groupby(['answer']).size().reset_index(name='count')
                 total = df['count'].sum()
                 df['percentage'] = (df['count'] / total * 100).round(1)
             else:
@@ -744,7 +744,7 @@ def show_Presentation_Format():
                
                 # Create pie chart
                 fig = px.pie(df,
-                             names='answers',
+                             names='answer',
                             values='count',
                             title="Event Format Distribution",
                             hole=0.3)
