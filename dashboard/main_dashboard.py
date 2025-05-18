@@ -728,6 +728,45 @@ def get_all_my_data():
         st.error(f"Sorry, can't load private data: {str(e)}")
 
 
+def show_Presentation_Format():
+    try:
+        event_format = Question.objects.filter(text__icontains="What events interest you?").first()
+        if event_format:
+            event_format_counts = Response.objects.filter(question= event_format,created_at__date__gte=st.session_state.date_range[0],
+                                                             created_at__date__lte=st.session_state.date_range[1])
+            df=pd.DataFrame(event_format_counts.annotate(date=TruncDate('created_at')).values('answer','created_at'))
+            if not df.empty: 
+                df.groupby(['answers']).size().reset_index(name='count')
+                total = df['count'].sum()
+                df['percentage'] = (df['count'] / total * 100).round(1)
+            else:
+                st.error("No Event format for dates chosen")
+               
+                # Create pie chart
+                fig = px.pie(df,
+                             names='answers',
+                            values='count',
+                            title="Event Format Distribution",
+                            hole=0.3)
+            
+                # Position legend and labels
+                fig.update_layout(
+                    legend=dict(
+                        orientation="v",
+                        yanchor="top",
+                        y=0.95,
+                        xanchor="left",
+                        x=0.65),
+                        showlegend=True
+                        ) 
+                st.plotly_chart(fig, use_container_width=True)
+                st.dataframe(df)
+        else:
+            st.write("Question not found")
+    except Exception as e:
+        st.error(f"Sorry, can't load event format data: {str(e)}")
+
+
 def show_private_insights(_private_data):
     """Admin analytics dashboard"""
     st.header("Administrator Dashboard")
@@ -1017,46 +1056,47 @@ def show_private_insights(_private_data):
     with st.expander("Other Metrics"):
         tab1, tab2, tab3, tab4 = st.tabs(["Presentation Format","About Windrush Foundation","Preferred Session Format", "Speaker Rating"])
         with tab1:
-            event_format = Question.objects.filter(text__icontains="What events interest you?").first()
-            if event_format:
-        # Get aggregated data
-                    event_format_counts = Response.objects.filter(question= event_format) \
-                        .values('answer') \
-                            .annotate(count=Count('id')) \
-                                .order_by('answer')
+             show_Presentation_Format()
+        #     event_format = Question.objects.filter(text__icontains="What events interest you?").first()
+        #     if event_format:
+        # # Get aggregated data
+        #             event_format_counts = Response.objects.filter(question= event_format) \
+        #                 .values('answer') \
+        #                     .annotate(count=Count('id')) \
+        #                         .order_by('answer')
                    
-                    cleaned_data=[{'answer':items['answer'].strip('"'),'count':items['count']} for items in event_format_counts]
-                    # Create DataFrame with proper structure
-                    df = pd.DataFrame(cleaned_data) \
-                    .rename(columns={'answer': 'Event Format', 'count': 'Count'})
-                    if not df.empty:
-                    # Calculate percentages
-                        total = df['Count'].sum()
-                        df['Percentage'] = (df['Count'] / total * 100).round(1)
-                        # Create pie chart
-                        fig = px.pie(df, 
-                                 names='Event Format',
-                                 values='Count',
-                                 title="Event Format Distribution",
-                                 hole=0.3)
+        #             cleaned_data=[{'answer':items['answer'].strip('"'),'count':items['count']} for items in event_format_counts]
+        #             # Create DataFrame with proper structure
+        #             df = pd.DataFrame(cleaned_data) \
+        #             .rename(columns={'answer': 'Event Format', 'count': 'Count'})
+        #             if not df.empty:
+        #             # Calculate percentages
+        #                 total = df['Count'].sum()
+        #                 df['Percentage'] = (df['Count'] / total * 100).round(1)
+        #                 # Create pie chart
+        #                 fig = px.pie(df, 
+        #                          names='Event Format',
+        #                          values='Count',
+        #                          title="Event Format Distribution",
+        #                          hole=0.3)
             
-                    # Position legend and labels
-                        fig.update_layout(
-                        legend=dict(
-                            orientation="v",
-                            yanchor="top",
-                            y=0.95,
-                            xanchor="left",
-                            x=0.65),
-                            showlegend=True
-                            )
+        #             # Position legend and labels
+        #                 fig.update_layout(
+        #                 legend=dict(
+        #                     orientation="v",
+        #                     yanchor="top",
+        #                     y=0.95,
+        #                     xanchor="left",
+        #                     x=0.65),
+        #                     showlegend=True
+        #                     )
             
-                        st.plotly_chart(fig, use_container_width=True)
-                        st.dataframe(df)
-                    else:
-                        st.write("No responses yet for this question")
-            else:
-                st.write("Question not found")
+        #                 st.plotly_chart(fig, use_container_width=True)
+        #                 st.dataframe(df)
+        #             else:
+        #                 st.write("No responses yet for this question")
+        #     else:
+        #         st.write("Question not found")
 
         with tab2:
             wf_loyalty = Question.objects.filter(text__icontains="How long have you been following Windrush Foundation?").first()
