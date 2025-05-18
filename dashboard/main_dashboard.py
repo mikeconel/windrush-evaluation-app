@@ -717,7 +717,7 @@ def get_all_my_data():
         df = pd.DataFrame(list(private_data.values('question','answer','participant','created_at')))
         if not df.empty:
             # Group by answer and count occurrences
-            df = df.groupby(['','question','answer','participant','created_at']).size().reset_index(name='count')
+            df = df.groupby(['id','question','answer','participant','created_at']).size().reset_index(name='count')
             st.write("Private Data")
             st.dataframe(df, width=1200)  # Adjust width dynamically
 
