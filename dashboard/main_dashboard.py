@@ -718,7 +718,9 @@ def get_all_my_data():
         if not df.empty:
             # Group by answer and count occurrences
             df = df.groupby(['question','answer','participant']).size().reset_index(name='count')
-            st.write("Private Data", df)
+            st.write("Private Data")
+            st.dataframe(df, width=1200)  # Adjust width dynamically
+
         else:
             st.error("No private data available for chosen dates.")       
 
