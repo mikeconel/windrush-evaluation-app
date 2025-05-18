@@ -729,41 +729,60 @@ def get_all_my_data():
 
 
 def show_Presentation_Format():
+    """Shows the distribution of preferred event formats."""
     try:
+        # Fetch the relevant question
         event_format = Question.objects.filter(text__icontains="What events interest you?").first()
-        if event_format:
-            event_format_counts = Response.objects.filter(question= event_format,created_at__date__gte=st.session_state.date_range[0],
-                                                             created_at__date__lte=st.session_state.date_range[1])
-            #df=pd.DataFrame(event_format_counts.annotate(date=TruncDate('created_at')).values('answer','created_at'))
-            df=pd.DataFrame(list(event_format_counts.values('answer','created_at')))
-            if not df.empty: 
-                df.groupby(['answer']).size().reset_index(name='count')
-                total = df['count'].sum()
-                df['percentage'] = (df['count'] / total * 100).round(1)
-            else:
-                st.error("No Event format for dates chosen")
-               
-                # Create pie chart
-                fig = px.pie(df,
-                             names='answer',
-                            values='count',
-                            title="Event Format Distribution",
-                            hole=0.3)
-            
-                # Position legend and labels
-                fig.update_layout(
-                    legend=dict(
-                        orientation="v",
-                        yanchor="top",
-                        y=0.95,
-                        xanchor="left",
-                        x=0.65),
-                        showlegend=True
-                        ) 
-                st.plotly_chart(fig, use_container_width=True)
-                st.dataframe(df)
+
+        if not event_format:
+            st.error("Question not found.")
+            return
+
+        # Fetch responses to the question
+        event_format_counts = Response.objects.filter(
+            question=event_format,
+            created_at__date__gte=st.session_state.date_range[0],
+            created_at__date__lte=st.session_state.date_range[1]
+        )
+
+        # Convert queryset to DataFrame
+        df = pd.DataFrame(list(event_format_counts.values('answer', 'created_at')))
+
+        if not df.empty:
+            # Group by answer and count occurrences
+            df = df.groupby(['answer']).size().reset_index(name='count')
+
+            # Calculate percentages
+            total = df['count'].sum()
+            df['percentage'] = (df['count'] / total * 100).round(1)
+
+            # Display message if no data found
+            if total == 0:
+                st.error("No Event format data for selected dates.")
+                return
+
+            # Create pie chart
+            fig = px.pie(df, names='answer', values='count',
+                         title="Event Format Distribution", hole=0.3)
+
+            # Position legend and labels
+            fig.update_layout(
+                legend=dict(
+                    orientation="v",
+                    yanchor="top",
+                    y=0.95,
+                    xanchor="left",
+                    x=0.65
+                ),
+                showlegend=True
+            )
+
+            st.plotly_chart(fig, use_container_width=True)
+            st.dataframe(df)
+
         else:
-            st.write("Question not found")
+            st.error("No Event format data for selected dates.")
+
     except Exception as e:
         st.error(f"Sorry, can't load event format data: {str(e)}")
 
