@@ -714,7 +714,7 @@ def get_all_my_data():
             created_at__date__lte=st.session_state.date_range[1]
         )
         # Convert queryset to DataFrame
-        df = pd.DataFrame(list(private_data.values('answer', 'created_at')))
+        df = pd.DataFrame(list(private_data.values(''question','answer','participant','created_at')))
         if not df.empty:
             # Group by answer and count occurrences
             df = df.groupby(['answer']).size().reset_index(name='count')
