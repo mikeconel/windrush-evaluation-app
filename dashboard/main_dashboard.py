@@ -702,10 +702,11 @@ def show_sentiments():
 
 def get_all_my_data():
     try:
-        private = get_private_data()
+        #private = get_private_data()
         st.write(private)
         private_data=Response.objects.filter(private,created_at_date_gte=st.session_state.date_range[0],
                                        created_at_date_lte=st.session_state.date_range[1])
+         st.write(private_data)
         
         df=pd.DataFrame(private_data.annotate(date=TruncDate('created_at'))).values('answer')
         if not df.empty:
