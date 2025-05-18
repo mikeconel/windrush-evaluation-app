@@ -717,7 +717,7 @@ def get_all_my_data():
         df = pd.DataFrame(list(private_data.values('question','answer','participant','created_at')))
         if not df.empty:
             # Group by answer and count occurrences
-            df = df.groupby(['participant']).size().reset_index(name='count')
+            df = df.groupby(['question','answer','participant']).size().reset_index(name='count')
             st.write("Private Data", df)
         else:
             st.error("No private data available for chosen dates.")       
