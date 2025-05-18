@@ -703,20 +703,27 @@ def show_sentiments():
 def get_all_my_data():
     try:
         private = get_private_data()
-        #st.write(private)
-        private_data=Response.objects.filter(question=private,created_at__date__gte=st.session_state.date_range[0],
-                                       created_at__date__lte=st.session_state.date_range[1])
-        st.write(private_data)
-        
-        df=pd.DataFrame(private_data.annotate(date=TruncDate('created_at'))).values('answer')
+
+        if private is None:
+            st.error("Access denied: Not authenticated.")
+            return
+
+        # Use private['responses'] instead of passing full dictionary
+        private_data = Response.objects.filter(
+            created_at__date__gte=st.session_state.date_range[0],
+            created_at__date__lte=st.session_state.date_range[1]
+        )
+        # Convert queryset to DataFrame
+        df = pd.DataFrame(list(private_data.values('answer', 'created_at')))
         if not df.empty:
-            df.groupby(['answer']).size().reset_index(name='count')
-            #st.write("Private Data", private_data['responses'])
+            # Group by answer and count occurrences
+            df = df.groupby(['answer']).size().reset_index(name='count')
             st.write("Private Data", df)
         else:
             st.error("No private data available for chosen dates.")       
+
     except Exception as e:
-        st.error(f"Sorry can't load private data: {str(e)}")
+        st.error(f"Sorry, can't load private data: {str(e)}")
 
 
 def show_private_insights(_private_data):
