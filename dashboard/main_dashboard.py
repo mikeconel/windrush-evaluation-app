@@ -734,7 +734,8 @@ def show_Presentation_Format():
         if event_format:
             event_format_counts = Response.objects.filter(question= event_format,created_at__date__gte=st.session_state.date_range[0],
                                                              created_at__date__lte=st.session_state.date_range[1])
-            df=pd.DataFrame(event_format_counts.annotate(date=TruncDate('created_at')).values('answer','created_at'))
+            #df=pd.DataFrame(event_format_counts.annotate(date=TruncDate('created_at')).values('answer','created_at'))
+            df=pd.DataFrame(list(event_format_counts.values('answer','created_at')))
             if not df.empty: 
                 df.groupby(['answer']).size().reset_index(name='count')
                 total = df['count'].sum()
