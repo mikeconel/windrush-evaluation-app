@@ -118,12 +118,15 @@ def show_public_components(data):
         feedback_data = Response.objects.filter(question__question_type='TX').values_list('answer', flat=True)
         if feedback_data:
             text = ' '.join([d for d in feedback_data if isinstance(d, str)])
-            wordcloud = WordCloud(width='auto', height=600).generate(text)
+            # Get screen width dynamically from Streamlit container
+            screen_width = st.get_window_size().width  # This retrieves the window width (in pixels)
+            adjusted_width = int(screen_width * 0.8)
+            wordcloud = WordCloud(width=adjusted_width, height=600).generate(text)
             st.image(wordcloud.to_array(), caption="Most Frequent Feedback Terms")
         else:
             st.info("No text feedback available yet")
 
-
+1700
 def handle_dates():
     """Central date range handler with persistent state"""
     # Store absolute min/max dates separately
