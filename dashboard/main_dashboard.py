@@ -100,17 +100,6 @@ def show_public_components(data):
         st.markdown(f"<p style='font-weight:bold'>For more Windrush Foundation events, check out our website:<a href='https://www.windrushfoundation.com/'><h5>www.windrushfoundation.com</h></a></p>",unsafe_allow_html=True)
 
 
-        # st.markdown("""
-        #     <div style='font-weight:bold'>
-        #         Your responses will help us improve future events.<br>
-        #         Check our website for more events: 
-        #         <a href='https://www.windrushfoundation.com/' style='color: #1E3A8A;'>
-        #             www.windrushfoundation.com
-        #         </a>
-        #     </div>""", 
-        #     unsafe_allow_html=True
-        # )
-
     # Word Cloud
     with st.container():
         st.markdown("<h5 style='color:blue;font-weight:bold'>Community Feedback Overview</h5>", 
@@ -958,8 +947,6 @@ def show_speaker_rating():
     except Exception as e:
         st.error(f"Sorry, can't load speaker rating data: {str(e)}")
 
-                    
-
 
 def show_private_insights(_private_data):
     """Admin analytics dashboard"""
@@ -993,67 +980,10 @@ def show_private_insights(_private_data):
         # Gender-Ethnicity Sunburst
         with col2:
             show_demographic_breakdown()
-            # demo_data = Participant.objects.values('gender', 'ethnicity').annotate(count=Count('id'))
-            # if demo_data.exists():
-            #     fig = px.sunburst(demo_data, path=['gender', 'ethnicity'], 
-            #                     values='count', title="Demographic Breakdown")
-            #     st.plotly_chart(fig, use_container_width=True)
-        
-        # Gender Distribution
+
         with col3:
             #st.subheader("Gender Distribution")
             show_gender_data()
-            # gender_data = Participant.objects.values('gender') \
-            #     .annotate(count=Count('id')) \
-            #         .order_by('-count')
-    
-            # if gender_data.exists():
-            #     # Create mapping from gender codes to labels
-            #     gender_labels = dict(Participant.GENDER_CHOICES)
-            #     counts = {
-            #     gender_labels[item['gender']]: item['count'] 
-            #     for item in gender_data
-            #     }
-        
-            #     # Display metrics with proper labels
-            #     col1, col2, col3 = st.columns(3)
-            #     col1.metric("Male", counts.get('Male', 0))
-            #     col2.metric("Female", counts.get('Female', 0))
-            #     col3.metric("Not Specified", counts.get('Not Specified', 0))
-            # else:
-            #     st.info("No gender data available")
-            ###########################
-            #             gender_data = Participant.objects.values('gender').annotate(count=Count('id'))
-            # if gender_data.exists():
-            #     counts = [item['count'] for item in gender_data]
-            #     genders = [item['gender'] for item in gender_data]
-                
-            #     fig, ax = plt.subplots(figsize=(6, 4))
-            #     ax.barh(genders, counts, color=['#1E3A8A', '#C4A747', '#94A3B8'])
-            #     ax.set_xlabel('Participants')
-            #     ax.set_title('Gender Distribution')
-            #     st.pyplot(fig)
-            
-            # st.subheader("Gender Distribution")
-            # gender_data = Participant.objects.values('gender') \
-            #     .annotate(count=Count('id')) \
-            #         .order_by('-count')
-    
-            # if gender_data.exists():
-            #     # Create mapping from gender codes to labels
-            #     gender_labels = dict(Participant.GENDER_CHOICES)
-            #     counts = {
-            #     gender_labels[item['gender']]: item['count'] 
-            #     for item in gender_data
-            #     }
-        
-            #     # Display metrics with proper labels
-            #     col1, col2, col3 = st.columns(3)
-            #     col1.metric("Male", counts.get('Male', 0))
-            #     col2.metric("Female", counts.get('Female', 0))
-            #     col3.metric("Not Specified", counts.get('Not Specified', 0))
-            # else:
-            #     st.info("No gender data available")
 
     # Geographic Analysis
     with st.expander("Visitor Origins Analysis", expanded=True):
@@ -1109,86 +1039,20 @@ def show_private_insights(_private_data):
         # Completion Rates
         with tab1:
             show_completion()
-            # sessions = EvaluationSession.objects.aggregate(
-            #     total=Count('id'),
-            #     completed=Count('id', filter=Q(completed=True))
-            # )
-            # if sessions['total'] > 0:
-            #     rate = (sessions['completed'] / sessions['total']) * 100
-            #     st.metric("Form Completion Rate", f"{rate:.1f}%")
-
         
         # Accessibility Needs
         with tab2:
             show_accessibility_needs()
-            # needs = Participant.objects.exclude(accessibility_needs__exact='')\
-            #          .values('accessibility_needs').annotate(count=Count('id'))
-            # if needs.exists():
-            #     fig = px.bar(needs, x='accessibility_needs', y='count',
-            #                title="Accessibility Requirements")
-            #     st.plotly_chart(fig, use_container_width=True)
-        
+
         # Referral Sources
         with tab3:
             col1,col2=st.columns(2)
             with col1:
                 show_marketing_referrals()
-                # referrals = Participant.objects.exclude(referral_source__exact='')
-                # if referrals.exists():
-                #     sources = pd.DataFrame(list(
-                #         referrals.values('referral_source').annotate(count=Count('id'))
-                #     ))
-                #     fig = px.pie(sources, names='referral_source', values='count',
-                #             title="Referral Sources Breakdown", hole=0.3)
-                #     st.plotly_chart(fig, use_container_width=True)
-            
-            
             with col2:
                 #with col2:
                 show_social_media_question()
-        #         social_media_question = Question.objects.filter(text__icontains="If you chose Social Media").first()
-    
-        #         if social_media_question:
-        #             #st.subheader("Social Media Platforms Usage")
-        
-        # # Get aggregated data
-        #             platform_counts = Response.objects.filter(question=social_media_question) \
-        #                 .values('answer') \
-        #                     .annotate(count=Count('id')) \
-        #                         .order_by('answer')
-                   
-        #             cleaned_data=[{'answer':items['answer'].strip('"'),'count':items['count']} for items in platform_counts]
-        #             # Create DataFrame with proper structure
-        #             df = pd.DataFrame(cleaned_data) \
-        #             .rename(columns={'answer': 'Platform', 'count': 'Count'})
-        #             if not df.empty:
-        #             # Calculate percentages
-        #                 total = df['Count'].sum()
-        #                 df['Percentage'] = (df['Count'] / total * 100).round(1)
-            
-        #             # Create pie chart
-        #                 fig = px.pie(df, 
-        #                          names='Platform',
-        #                          values='Count',
-        #                          title="Social Media Platform Distribution",
-        #                          hole=0.3)
-            
-        #             # Position legend and labels
-        #                 fig.update_layout(
-        #                 legend=dict(
-        #                     orientation="v",
-        #                     yanchor="top",
-        #                     y=0.95,
-        #                     xanchor="left",
-        #                     x=1.05),
-        #                     showlegend=True
-        #                     )
-            
-        #                 st.plotly_chart(fig, use_container_width=True)
-        #             else:
-        #                 st.write("No responses yet for this question")
-        #         else:
-        #             st.write("Question not found")        
+     
     
 #################################################
     with st.expander("Private Data", expanded=True):
@@ -1196,52 +1060,10 @@ def show_private_insights(_private_data):
         with tab1:
             # Perform sentiment analysis
             show_sentiments()
-            text_responses = Response.objects.filter(question_id='15').values_list('answer', flat=True)
-    
-            # if text_responses.exists():
-            #     st.subheader("Sentiment Analysis")
-            # # Get analysis results
-            #     sentiment_results = sentiment_analysis(text_responses)
-            # # Display in two columns for better layout
-            #     col1, col2 = st.columns([1, 3])
-        
-            #     with col1:
-            #         # Show summary metrics
-            #         st.metric("Positive Responses", f"{sentiment_results.get('positive', 0)}%")
-            #         st.metric("Neutral Responses", f"{sentiment_results.get('neutral', 0)}%")
-            #         st.metric("Negative Responses", f"{sentiment_results.get('negative', 0)}%")
-        
-            #     with col2:
-            #     # Show detailed dataframe
-            #         st.dataframe(pd.DataFrame.from_dict(sentiment_results, orient='index', columns=['Percentage']),
-            #                      use_container_width=True)
-            #     # Optional: Add visualization
-            #     fig = px.pie(names=list(sentiment_results.keys()),
-            #                  values=list(sentiment_results.values()),title="Sentiment Distribution", hole=0.6)
-            #     # Position legend and labels
-            #     fig.update_layout(
-            #         legend=dict(
-            #             orientation="v",
-            #                 yanchor="top",
-            #                 y=0.95,
-            #                 xanchor="left",
-            #                 x=0.65),
-            #                 showlegend=True
-            #                 )
-            
-            #     st.plotly_chart(fig, use_container_width=True)
-        
-            # else:
-            #     st.warning("No text responses available for sentiment analysis")
-
-
-        
+          
         with tab2:
             get_all_my_data()
-            #private_data = get_private_data()
-            #st.write(private_data)
-            #st.write("Private Data", private_data['responses'])
-            
+
 # Add force refresh button
     if st.button("Refresh All Data"):
         st.session_state.clear()
@@ -1251,179 +1073,15 @@ def show_private_insights(_private_data):
         tab1, tab2, tab3, tab4 = st.tabs(["Presentation Format","About Windrush Foundation","Preferred Session Format", "Speaker Rating"])
         with tab1:
              show_Presentation_Format()
-        #     event_format = Question.objects.filter(text__icontains="What events interest you?").first()
-        #     if event_format:
-        # # Get aggregated data
-        #             event_format_counts = Response.objects.filter(question= event_format) \
-        #                 .values('answer') \
-        #                     .annotate(count=Count('id')) \
-        #                         .order_by('answer')
-                   
-        #             cleaned_data=[{'answer':items['answer'].strip('"'),'count':items['count']} for items in event_format_counts]
-        #             # Create DataFrame with proper structure
-        #             df = pd.DataFrame(cleaned_data) \
-        #             .rename(columns={'answer': 'Event Format', 'count': 'Count'})
-        #             if not df.empty:
-        #             # Calculate percentages
-        #                 total = df['Count'].sum()
-        #                 df['Percentage'] = (df['Count'] / total * 100).round(1)
-        #                 # Create pie chart
-        #                 fig = px.pie(df, 
-        #                          names='Event Format',
-        #                          values='Count',
-        #                          title="Event Format Distribution",
-        #                          hole=0.3)
-            
-        #             # Position legend and labels
-        #                 fig.update_layout(
-        #                 legend=dict(
-        #                     orientation="v",
-        #                     yanchor="top",
-        #                     y=0.95,
-        #                     xanchor="left",
-        #                     x=0.65),
-        #                     showlegend=True
-        #                     )
-            
-        #                 st.plotly_chart(fig, use_container_width=True)
-        #                 st.dataframe(df)
-        #             else:
-        #                 st.write("No responses yet for this question")
-        #     else:
-        #         st.write("Question not found")
 
         with tab2:
             show_windrush_loyalty()
-        #     wf_loyalty = Question.objects.filter(text__icontains="How long have you been following Windrush Foundation?").first()
-        #     if wf_loyalty:
-        # # Get aggregated data
-        #             wf_loyalty_counts = Response.objects.filter(question=wf_loyalty) \
-        #                 .values('answer') \
-        #                     .annotate(count=Count('id')) \
-        #                         .order_by('answer')
-                   
-        #             cleaned_data=[{'answer':items['answer'].strip('"'),'count':items['count']} for items in wf_loyalty_counts]
-        #             # Create DataFrame with proper structure
-        #             df = pd.DataFrame(cleaned_data) \
-        #             .rename(columns={'answer': 'Windrush Foundation Loyalty Levels', 'count': 'Count'})
-        #             if not df.empty:
-        #             # Calculate percentages
-        #                 total = df['Count'].sum()
-        #                 df['Percentage'] = (df['Count'] / total * 100).round(1)
-        #                 st.write("How long supporters have been following Windrush Foundation")
-        #                 # Create pie chart
-        #                 fig = px.pie(df, 
-        #                          names='Windrush Foundation Loyalty Levels',
-        #                          values='Count',
-        #                          title="Windrush Foundation Loyalty Levels Distribution",
-        #                          hole=0.3)
-            
-        #             # Position legend and labels
-        #                 fig.update_layout(
-        #                 legend=dict(
-        #                     orientation="v",
-        #                     yanchor="top",
-        #                     y=0.95,
-        #                     xanchor="left",
-        #                     x=0.65),
-        #                     showlegend=True
-        #                     )
-            
-        #                 st.plotly_chart(fig, use_container_width=True)
-        #                 #st.dataframe(df)
-        #             else:
-        #                 st.write("No responses yet for this question")
-        #     else:
-        #         st.write("Question not found")
         
         with tab3:
             show_preferred_session()
-        #     preferred_session = Question.objects.filter(text__icontains="Which sessions did you find most valuable?").first()
-        #     if preferred_session:
-        # # Get aggregated data
-        #             preferred_session_counts = Response.objects.filter(question=preferred_session) \
-        #                 .values('answer') \
-        #                     .annotate(count=Count('id')) \
-        #                         .order_by('answer')
-                   
-        #             cleaned_data=[{'answer':items['answer'].strip('"'),'count':items['count']} for items in preferred_session_counts]
-        #             # Create DataFrame with proper structure
-        #             df = pd.DataFrame(cleaned_data) \
-        #             .rename(columns={'answer': 'Preferred Session Format', 'count': 'Count'})
-        #             if not df.empty:
-        #             # Calculate percentages
-        #                 total = df['Count'].sum()
-        #                 df['Percentage'] = (df['Count'] / total * 100).round(1)
-        #                 st.write("Supporters preferred session format")
-        #                 # Create pie chart
-        #                 fig = px.pie(df, 
-        #                          names='Preferred Session Format',
-        #                          values='Count',
-        #                          title="Preferred Session Format Distribution",
-        #                          hole=0.3)
-            
-        #             # Position legend and labels
-        #                 fig.update_layout(
-        #                 legend=dict(
-        #                     orientation="v",
-        #                     yanchor="top",
-        #                     y=0.95,
-        #                     xanchor="left",
-        #                     x=0.65),
-        #                     showlegend=True
-        #                     )
-            
-        #                 st.plotly_chart(fig, use_container_width=True)
-        #                 st.dataframe(df)
-        #             else:
-        #                 st.write("No responses yet for this question")
-        #     else:
-        #         st.write("Question not found")
 
         with tab4:
             show_speaker_rating()
-            speaker_rating = Question.objects.filter(text__icontains="What did you think of the keynote speaker?").first()
-        #     if speaker_rating:
-        # # Get aggregated data
-        #             speaker_rating_counts = Response.objects.filter(question=speaker_rating) \
-        #                 .values('answer') \
-        #                     .annotate(count=Count('id')) \
-        #                         .order_by('answer')
-                   
-        #             cleaned_data=[{'answer':items['answer'].strip('"'),'count':items['count']} for items in speaker_rating_counts]
-        #             # Create DataFrame with proper structure
-        #             df = pd.DataFrame(cleaned_data) \
-        #             .rename(columns={'answer': 'Speaker Rating', 'count': 'Count'})
-        #             if not df.empty:
-        #             # Calculate percentages
-        #                 total = df['Count'].sum()
-        #                 df['Percentage'] = (df['Count'] / total * 100).round(1)
-        #                 # Create pie chart
-        #                 fig = px.pie(df, 
-        #                          names='Speaker Rating',
-        #                          values='Count',
-        #                          title="Speaker Rating Distribution",
-        #                          hole=0.3)
-            
-        #             # Position legend and labels
-        #                 fig.update_layout(
-        #                 legend=dict(
-        #                     orientation="v",
-        #                     yanchor="top",
-        #                     y=0.95,
-        #                     xanchor="left",
-        #                     x=0.65),
-        #                     showlegend=True
-        #                     )
-            
-        #                 st.plotly_chart(fig, use_container_width=True)
-        #                 st.dataframe(df)
-        #             else:
-        #                 st.write("No responses yet for this question")
-        #     else:
-        #         st.write("Question")
-
-
 
 
 from textblob import TextBlob  # Requires textblob package
