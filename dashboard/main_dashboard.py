@@ -850,6 +850,55 @@ def show_windrush_loyalty():
         st.error(f"Sorry, can't load Windrush loyalty data: {str(e)}")
 
 
+def show_preferred_session():
+    """Shows how long supporters have been following Windrush Foundation."""
+    try:
+        # Fetch the relevant question
+        preferred_session = Question.objects.filter(text__icontains="Which sessions did you find most valuable?").first()
+
+        if not preferred_session:
+            st.error("Question not found.")
+            return
+            
+        # Fetch responses to the question
+        preferred_session_answer = Response.objects.filter(
+            question=preferred_session,
+            created_at__date__gte=st.session_state.date_range[0],
+            created_at__date__lte=st.session_state.date_range[1])
+        # Convert queryset to DataFrame
+        df = pd.DataFrame(list(preferred_session_answer.values('answer', 'created_at')))
+
+        if not df.empty:
+            df.groupby(['answer']).size().resize_index(name="count")
+            df.rename(columns={'answer': 'Preferred Session Format', 'count': 'Count'})
+            # Calculate percentages
+            total = df['Count'].sum()
+            df['Percentage'] = (df['Count'] / total * 100).round(1)
+            st.write("Supporters preferred session format")
+            # Create pie chart
+            fig = px.pie(df,names='Preferred Session Format',
+                         values='Count',
+                         title="Preferred Session Format Distribution",
+                         hole=0.3)
+            
+            # Position legend and labels
+            fig.update_layout(
+                legend=dict(
+                    orientation="v",
+                    yanchor="top",
+                    y=0.95,
+                    xanchor="left",
+                    x=0.65),
+                    showlegend=True)
+            
+            st.plotly_chart(fig, use_container_width=True)
+            st.dataframe(df)
+        else:
+            st.write("No responses yet for this question.")
+
+    except Exception as e:
+        st.error(f"Sorry, can't load Windrush loyalty data: {str(e)}")
+
                     
 
 
@@ -1229,47 +1278,48 @@ def show_private_insights(_private_data):
         #         st.write("Question not found")
         
         with tab3:
-            preferred_session = Question.objects.filter(text__icontains="Which sessions did you find most valuable?").first()
-            if preferred_session:
-        # Get aggregated data
-                    preferred_session_counts = Response.objects.filter(question=preferred_session) \
-                        .values('answer') \
-                            .annotate(count=Count('id')) \
-                                .order_by('answer')
+            show_preferred_session()
+        #     preferred_session = Question.objects.filter(text__icontains="Which sessions did you find most valuable?").first()
+        #     if preferred_session:
+        # # Get aggregated data
+        #             preferred_session_counts = Response.objects.filter(question=preferred_session) \
+        #                 .values('answer') \
+        #                     .annotate(count=Count('id')) \
+        #                         .order_by('answer')
                    
-                    cleaned_data=[{'answer':items['answer'].strip('"'),'count':items['count']} for items in preferred_session_counts]
-                    # Create DataFrame with proper structure
-                    df = pd.DataFrame(cleaned_data) \
-                    .rename(columns={'answer': 'Preferred Session Format', 'count': 'Count'})
-                    if not df.empty:
-                    # Calculate percentages
-                        total = df['Count'].sum()
-                        df['Percentage'] = (df['Count'] / total * 100).round(1)
-                        st.write("Supporters preferred session format")
-                        # Create pie chart
-                        fig = px.pie(df, 
-                                 names='Preferred Session Format',
-                                 values='Count',
-                                 title="Preferred Session Format Distribution",
-                                 hole=0.3)
+        #             cleaned_data=[{'answer':items['answer'].strip('"'),'count':items['count']} for items in preferred_session_counts]
+        #             # Create DataFrame with proper structure
+        #             df = pd.DataFrame(cleaned_data) \
+        #             .rename(columns={'answer': 'Preferred Session Format', 'count': 'Count'})
+        #             if not df.empty:
+        #             # Calculate percentages
+        #                 total = df['Count'].sum()
+        #                 df['Percentage'] = (df['Count'] / total * 100).round(1)
+        #                 st.write("Supporters preferred session format")
+        #                 # Create pie chart
+        #                 fig = px.pie(df, 
+        #                          names='Preferred Session Format',
+        #                          values='Count',
+        #                          title="Preferred Session Format Distribution",
+        #                          hole=0.3)
             
-                    # Position legend and labels
-                        fig.update_layout(
-                        legend=dict(
-                            orientation="v",
-                            yanchor="top",
-                            y=0.95,
-                            xanchor="left",
-                            x=0.65),
-                            showlegend=True
-                            )
+        #             # Position legend and labels
+        #                 fig.update_layout(
+        #                 legend=dict(
+        #                     orientation="v",
+        #                     yanchor="top",
+        #                     y=0.95,
+        #                     xanchor="left",
+        #                     x=0.65),
+        #                     showlegend=True
+        #                     )
             
-                        st.plotly_chart(fig, use_container_width=True)
-                        st.dataframe(df)
-                    else:
-                        st.write("No responses yet for this question")
-            else:
-                st.write("Question not found")
+        #                 st.plotly_chart(fig, use_container_width=True)
+        #                 st.dataframe(df)
+        #             else:
+        #                 st.write("No responses yet for this question")
+        #     else:
+        #         st.write("Question not found")
 
         with tab4:
             speaker_rating = Question.objects.filter(text__icontains="What did you think of the keynote speaker?").first()
