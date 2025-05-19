@@ -1388,46 +1388,45 @@ def show_private_insights(_private_data):
         with tab4:
             show_speaker_rating()
             speaker_rating = Question.objects.filter(text__icontains="What did you think of the keynote speaker?").first()
-            if speaker_rating:
-        # Get aggregated data
-                    speaker_rating_counts = Response.objects.filter(question=speaker_rating) \
-                        .values('answer') \
-                            .annotate(count=Count('id')) \
-                                .order_by('answer')
+        #     if speaker_rating:
+        # # Get aggregated data
+        #             speaker_rating_counts = Response.objects.filter(question=speaker_rating) \
+        #                 .values('answer') \
+        #                     .annotate(count=Count('id')) \
+        #                         .order_by('answer')
                    
-                    cleaned_data=[{'answer':items['answer'].strip('"'),'count':items['count']} for items in speaker_rating_counts]
-                    # Create DataFrame with proper structure
-                    df = pd.DataFrame(cleaned_data) \
-                    .rename(columns={'answer': 'Speaker Rating', 'count': 'Count'})
-                    if not df.empty:
-                    # Calculate percentages
-                        total = df['Count'].sum()
-                        df['Percentage'] = (df['Count'] / total * 100).round(1)
-                        # Create pie chart
-                        fig = px.pie(df, 
-                                 names='Speaker Rating',
-                                 values='Count',
-                                 title="Speaker Rating Distribution",
-                                 hole=0.3)
+        #             cleaned_data=[{'answer':items['answer'].strip('"'),'count':items['count']} for items in speaker_rating_counts]
+        #             # Create DataFrame with proper structure
+        #             df = pd.DataFrame(cleaned_data) \
+        #             .rename(columns={'answer': 'Speaker Rating', 'count': 'Count'})
+        #             if not df.empty:
+        #             # Calculate percentages
+        #                 total = df['Count'].sum()
+        #                 df['Percentage'] = (df['Count'] / total * 100).round(1)
+        #                 # Create pie chart
+        #                 fig = px.pie(df, 
+        #                          names='Speaker Rating',
+        #                          values='Count',
+        #                          title="Speaker Rating Distribution",
+        #                          hole=0.3)
             
-                    # Position legend and labels
-                        fig.update_layout(
-                        legend=dict(
-                            orientation="v",
-                            yanchor="top",
-                            y=0.95,
-                            xanchor="left",
-                            x=0.65),
-                            showlegend=True
-                            )
+        #             # Position legend and labels
+        #                 fig.update_layout(
+        #                 legend=dict(
+        #                     orientation="v",
+        #                     yanchor="top",
+        #                     y=0.95,
+        #                     xanchor="left",
+        #                     x=0.65),
+        #                     showlegend=True
+        #                     )
             
-                        st.plotly_chart(fig, use_container_width=True)
-                        st.dataframe(df)
-                    else:
-                        st.write("No responses yet for this question")
-            else:
-                st.write("Question not found")
-    
+        #                 st.plotly_chart(fig, use_container_width=True)
+        #                 st.dataframe(df)
+        #             else:
+        #                 st.write("No responses yet for this question")
+        #     else:
+        #         st.write("Question")
 
 
 
