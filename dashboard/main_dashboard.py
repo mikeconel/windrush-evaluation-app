@@ -899,11 +899,6 @@ def show_preferred_session():
     except Exception as e:
         st.error(f"Sorry, can't load Windrush loyalty data: {str(e)}")
 
-import streamlit as st
-import pandas as pd
-import plotly.express as px
-from django.db.models.functions import TruncDate
-
 def show_speaker_rating():
     """Shows ratings for the keynote speaker."""
     try:
