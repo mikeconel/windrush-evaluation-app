@@ -870,14 +870,14 @@ def show_preferred_session():
 
         if not df.empty:
             df.groupby(['answer']).size().reset_index(name="count")
-            df.rename(columns={'answer': 'Preferred Session Format', 'count': 'Count'})
+            df.rename(columns={'answer': 'Preferred Session Format'})
             # Calculate percentages
             total = df['Count'].sum()
-            df['Percentage'] = (df['Count'] / total * 100).round(1)
+            df['Percentage'] = (df['count'] / total * 100).round(1)
             st.write("Supporters preferred session format")
             # Create pie chart
             fig = px.pie(df,names='Preferred Session Format',
-                         values='Count',
+                         values='count',
                          title="Preferred Session Format Distribution",
                          hole=0.3)
             
