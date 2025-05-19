@@ -869,8 +869,8 @@ def show_preferred_session():
         df = pd.DataFrame(list(preferred_session_answer.values('answer', 'created_at')))
 
         if not df.empty:
-            df.groupby(['answer']).size().reset_index(name="count")
-            df.rename(columns={'answer': 'Preferred Session Format'})
+            df = df.groupby(['answer']).size().reset_index(name="count")
+            df = df.rename(columns={'answer': 'Preferred Session Format'})
             # Calculate percentages
             total = df['count'].sum()
             df['Percentage'] = (df['count'] / total * 100).round(1)
