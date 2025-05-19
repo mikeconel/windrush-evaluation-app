@@ -118,7 +118,7 @@ def show_public_components(data):
         feedback_data = Response.objects.filter(question__question_type='TX').values_list('answer', flat=True)
         if feedback_data:
             text = ' '.join([d for d in feedback_data if isinstance(d, str)])
-            wordcloud = WordCloud(width=1700, height=600).generate(text)
+            wordcloud = WordCloud(width='auto', height=600).generate(text)
             st.image(wordcloud.to_array(), caption="Most Frequent Feedback Terms")
         else:
             st.info("No text feedback available yet")
@@ -1596,6 +1596,6 @@ def main():
             st.download_button(label="Export Full Dataset", data=private_data['responses'].to_csv(), file_name="windrush_data_export.csv")
     st.title("")
     st.title("")
-    st.write("Designed by BIS Smart Digital Technologies")
+    st.write("Designed by BIS Smart Digital Solutions")
 if __name__ == "__main__":
     main()
