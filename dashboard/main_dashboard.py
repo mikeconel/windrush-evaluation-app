@@ -788,6 +788,71 @@ def show_Presentation_Format():
         st.error(f"Sorry, can't load event format data: {str(e)}")
 
 
+def show_windrush_loyalty():
+    """Shows how long supporters have been following Windrush Foundation."""
+    try:
+        # Fetch the relevant question
+        loyalty_question = Question.objects.filter(text__icontains="How long have you been following Windrush Foundation?").first()
+
+        if not loyalty_question:
+            st.error("Question not found.")
+            return
+            
+        # Fetch responses to the question
+        loyalty_answer = Response.objects.filter(
+            question=loyalty_question,
+            created_at__date__gte=st.session_state.date_range[0],
+            created_at__date__lte=st.session_state.date_range[1]
+        )
+
+        # Convert queryset to DataFrame
+        df = pd.DataFrame(list(loyalty_answer.values('answer', 'created_at')))
+
+        if not df.empty:
+            # Group by answer and count occurrences
+            df = df.groupby(['answer']).size().reset_index(name="count")
+
+            # Rename columns for clarity
+            df = df.rename(columns={'answer': 'Windrush Foundation Loyalty Levels'})
+
+            # Calculate percentages
+            total = df['count'].sum()
+            df['percentage'] = (df['count'] / total * 100).round(1)
+
+            st.write("How long supporters have been following Windrush Foundation")
+
+            # Create pie chart
+            fig = px.pie(df,
+                         names='Windrush Foundation Loyalty Levels',
+                         values='count',
+                         title="Windrush Foundation Loyalty Levels Distribution",
+                         hole=0.3)
+
+            # Position legend and labels
+            fig.update_layout(
+                legend=dict(
+                    orientation="v",
+                    yanchor="top",
+                    y=0.95,
+                    xanchor="left",
+                    x=0.65
+                ),
+                showlegend=True
+            )
+
+            st.plotly_chart(fig, use_container_width=True)
+            st.dataframe(df)
+
+        else:
+            st.write("No responses yet for this question.")
+
+    except Exception as e:
+        st.error(f"Sorry, can't load Windrush loyalty data: {str(e)}")
+
+
+                    
+
+
 def show_private_insights(_private_data):
     """Admin analytics dashboard"""
     st.header("Administrator Dashboard")
@@ -1120,47 +1185,48 @@ def show_private_insights(_private_data):
         #         st.write("Question not found")
 
         with tab2:
-            wf_loyalty = Question.objects.filter(text__icontains="How long have you been following Windrush Foundation?").first()
-            if wf_loyalty:
-        # Get aggregated data
-                    wf_loyalty_counts = Response.objects.filter(question=wf_loyalty) \
-                        .values('answer') \
-                            .annotate(count=Count('id')) \
-                                .order_by('answer')
+            show_windrush_loyalty()
+        #     wf_loyalty = Question.objects.filter(text__icontains="How long have you been following Windrush Foundation?").first()
+        #     if wf_loyalty:
+        # # Get aggregated data
+        #             wf_loyalty_counts = Response.objects.filter(question=wf_loyalty) \
+        #                 .values('answer') \
+        #                     .annotate(count=Count('id')) \
+        #                         .order_by('answer')
                    
-                    cleaned_data=[{'answer':items['answer'].strip('"'),'count':items['count']} for items in wf_loyalty_counts]
-                    # Create DataFrame with proper structure
-                    df = pd.DataFrame(cleaned_data) \
-                    .rename(columns={'answer': 'Windrush Foundation Loyalty Levels', 'count': 'Count'})
-                    if not df.empty:
-                    # Calculate percentages
-                        total = df['Count'].sum()
-                        df['Percentage'] = (df['Count'] / total * 100).round(1)
-                        st.write("How long supporters have been following Windrush Foundation")
-                        # Create pie chart
-                        fig = px.pie(df, 
-                                 names='Windrush Foundation Loyalty Levels',
-                                 values='Count',
-                                 title="Windrush Foundation Loyalty Levels Distribution",
-                                 hole=0.3)
+        #             cleaned_data=[{'answer':items['answer'].strip('"'),'count':items['count']} for items in wf_loyalty_counts]
+        #             # Create DataFrame with proper structure
+        #             df = pd.DataFrame(cleaned_data) \
+        #             .rename(columns={'answer': 'Windrush Foundation Loyalty Levels', 'count': 'Count'})
+        #             if not df.empty:
+        #             # Calculate percentages
+        #                 total = df['Count'].sum()
+        #                 df['Percentage'] = (df['Count'] / total * 100).round(1)
+        #                 st.write("How long supporters have been following Windrush Foundation")
+        #                 # Create pie chart
+        #                 fig = px.pie(df, 
+        #                          names='Windrush Foundation Loyalty Levels',
+        #                          values='Count',
+        #                          title="Windrush Foundation Loyalty Levels Distribution",
+        #                          hole=0.3)
             
-                    # Position legend and labels
-                        fig.update_layout(
-                        legend=dict(
-                            orientation="v",
-                            yanchor="top",
-                            y=0.95,
-                            xanchor="left",
-                            x=0.65),
-                            showlegend=True
-                            )
+        #             # Position legend and labels
+        #                 fig.update_layout(
+        #                 legend=dict(
+        #                     orientation="v",
+        #                     yanchor="top",
+        #                     y=0.95,
+        #                     xanchor="left",
+        #                     x=0.65),
+        #                     showlegend=True
+        #                     )
             
-                        st.plotly_chart(fig, use_container_width=True)
-                        #st.dataframe(df)
-                    else:
-                        st.write("No responses yet for this question")
-            else:
-                st.write("Question not found")
+        #                 st.plotly_chart(fig, use_container_width=True)
+        #                 #st.dataframe(df)
+        #             else:
+        #                 st.write("No responses yet for this question")
+        #     else:
+        #         st.write("Question not found")
         
         with tab3:
             preferred_session = Question.objects.filter(text__icontains="Which sessions did you find most valuable?").first()
