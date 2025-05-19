@@ -1063,11 +1063,6 @@ def show_private_insights(_private_data):
           
         with tab2:
             get_all_my_data()
-
-# Add force refresh button
-    if st.button("Refresh All Data"):
-        st.session_state.clear()
-        st.rerun()
     
     with st.expander("Other Metrics"):
         tab1, tab2, tab3, tab4 = st.tabs(["Presentation Format","About Windrush Foundation","Preferred Session Format", "Speaker Rating"])
@@ -1082,6 +1077,10 @@ def show_private_insights(_private_data):
 
         with tab4:
             show_speaker_rating()
+# Add force refresh button
+    if st.button("Refresh All Data"):
+        st.session_state.clear()
+        st.rerun()
 
 
 from textblob import TextBlob  # Requires textblob package
