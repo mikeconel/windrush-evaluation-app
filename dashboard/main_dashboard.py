@@ -899,29 +899,49 @@ def show_preferred_session():
     except Exception as e:
         st.error(f"Sorry, can't load Windrush loyalty data: {str(e)}")
 
+import streamlit as st
+import pandas as pd
+import plotly.express as px
+from django.db.models.functions import TruncDate
+
 def show_speaker_rating():
+    """Shows ratings for the keynote speaker."""
     try:
+        # Fetch the relevant question
         speaker_rating = Question.objects.filter(text__icontains="What did you think of the keynote speaker?").first()
+
         if not speaker_rating:
             st.error("Question not found.")
             return
-        speaker_rating_answer=(question=speaker_rating,created_at__date__gte=st.session_state.date_range[0],
-        created_at__date__lte=st.session_state.date_range[1])
-        df=pd.DataFrame(list(speaker_rating_answer.values('answers','created_at')))
+
+        # Fetch responses to the question
+        speaker_rating_answer = Response.objects.filter(
+            question=speaker_rating,
+            created_at__date__gte=st.session_state.date_range[0],
+            created_at__date__lte=st.session_state.date_range[1]
+        )
+
+        # Convert queryset to DataFrame
+        df = pd.DataFrame(list(speaker_rating_answer.values('answer', 'created_at')))
+
         if not df.empty:
-            df=df.groupby(['answer']).size().reset_index(name='count')
-            df=df.rename(columns={'answer': 'Speaker Rating'})
+            # Group by answer and count occurrences
+            df = df.groupby(['answer']).size().reset_index(name='count')
+
+            # Rename columns for clarity
+            df = df.rename(columns={'answer': 'Speaker Rating'})
 
             # Calculate percentages
             total = df['count'].sum()
-            df['Percentage'] = (df['count'] / total * 100).round(1)
+            df['percentage'] = (df['count'] / total * 100).round(1)
+
             # Create pie chart
             fig = px.pie(df,
                          names='Speaker Rating',
-                         values='Count',
+                         values='count',
                          title="Speaker Rating Distribution",
                          hole=0.3)
-            
+
             # Position legend and labels
             fig.update_layout(
                 legend=dict(
@@ -929,17 +949,20 @@ def show_speaker_rating():
                     yanchor="top",
                     y=0.95,
                     xanchor="left",
-                    x=0.65),
-                showlegend=True)
-            
+                    x=0.65
+                ),
+                showlegend=True
+            )
+
             st.plotly_chart(fig, use_container_width=True)
             st.dataframe(df)
-            else:
-                st.write("No responses yet for this question")
-            else:
-                st.write("Question not found") 
+
+        else:
+            st.write("No responses yet for this question.")
+
     except Exception as e:
-        st.error(f"Sorry, show_speaker_rating data: {str(e)}")
+        st.error(f"Sorry, can't load speaker rating data: {str(e)}")
+
                     
 
 
