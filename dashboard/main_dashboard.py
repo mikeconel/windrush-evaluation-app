@@ -624,11 +624,11 @@ def show_sentiments():
         # Get the relevant question
         #sentiment_question = Question.objects.filter(id=15).first()
         
-        sentiment_question_1 = Question.objects.filter(text__icontains="How has Windrush Foundation influenced your understanding of heritage?").first()
+        #sentiment_question_1 = Question.objects.filter(text__icontains="How has Windrush Foundation influenced your understanding of heritage?").first()
         #sentiment_question_2 = Question.objects.filter(text__icontains="What was the most valuable part of the event?").first()
         #sentiment_question_3 = Question.objects.filter(text__icontains="What could we improve?").first()
-        #sentiment_question_4 = Question.objects.filter(text__icontains="Any further comment on the overall event will be greatly appreciated.").first()
-        sentiment_question_all=[sentiment_question_1]
+        sentiment_question_4 = Question.objects.filter(text__icontains="Any further comment on the overall event will be greatly appreciated.").first()
+        sentiment_question_all=[sentiment_question_4]
 
         for question in sentiment_question_all:
             sentiment_question=question
